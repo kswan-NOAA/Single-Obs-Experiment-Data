@@ -1,0 +1,277 @@
+datasets:
+ - name: experiment
+   type: CubedSphereRestart
+   restart_filenames:
+     - anl/iter2.3dvar.c24.fv_core.res.tile1.nc
+     - anl/iter2.3dvar.c24.fv_core.res.tile2.nc
+     - anl/iter2.3dvar.c24.fv_core.res.tile3.nc
+     - anl/iter2.3dvar.c24.fv_core.res.tile4.nc
+     - anl/iter2.3dvar.c24.fv_core.res.tile5.nc
+     - anl/iter2.3dvar.c24.fv_core.res.tile6.nc
+   orog_filenames:
+     - /work/noaa/global/glopara/fix/orog/20220805/C384/C384_oro_data.tile1.nc
+     - /work/noaa/global/glopara/fix/orog/20220805/C384/C384_oro_data.tile2.nc
+     - /work/noaa/global/glopara/fix/orog/20220805/C384/C384_oro_data.tile3.nc
+     - /work/noaa/global/glopara/fix/orog/20220805/C384/C384_oro_data.tile4.nc
+     - /work/noaa/global/glopara/fix/orog/20220805/C384/C384_oro_data.tile5.nc
+     - /work/noaa/global/glopara/fix/orog/20220805/C384/C384_oro_data.tile6.nc
+   3d variables: [T,ua,va]
+   orography variables: [geolon, geolat]
+  
+graphics:
+  - batch figure:
+      variables: [T]
+    dynamic options:
+      - type: vminvmaxcmap
+        data variable: experiment::FV3Vars3D::T
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Observations | FV3 Upper | 2m Temperature | Exp T3.1'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/fv3_upper_T.png
+    plots:
+      - mapping:
+          projection: plcarr
+          domain: mid atlantic
+        add_map_features: ['coastline']
+        add_colorbar:
+          label: 2m Temperature
+        add_grid:
+        layers:
+        - type: MapGridded
+          longitude:
+            variable: experiment::FV3Orog::geolon
+          latitude:
+            variable: experiment::FV3Orog::geolat
+          data:
+            variable: experiment::FV3Vars3D::T
+            slices: '[1,...]'
+          label: 2m T
+          colorbar: true
+          cmap: 'Spectral'
+          vmin: -15.0
+          vmax: 15.0
+
+  - batch figure:
+      variables: [ua]
+    dynamic options:
+      - type: vminvmaxcmap
+        data variable: experiment::FV3Vars3D::ua
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Observations | FV3 Upper | U Wind | Exp T3.1'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/fv3_upper_ua.png
+    plots:
+      - mapping:
+          projection: plcarr
+          domain: mid atlantic
+        add_map_features: ['coastline']
+        add_colorbar:
+          label: u Wind
+        add_grid:
+        layers:
+        - type: MapGridded
+          longitude:
+            variable: experiment::FV3Orog::geolon
+          latitude:
+            variable: experiment::FV3Orog::geolat
+          data:
+            variable: experiment::FV3Vars3D::ua
+            slices: '[1,...]'
+          label: ua
+          colorbar: true
+          cmap: 'bwr'
+          vmin: -3.0
+          vmax: 3.0
+
+  - batch figure:
+      variables: [va]
+    dynamic options:
+      - type: vminvmaxcmap
+        data variable: experiment::FV3Vars3D::va
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Observations | FV3 Upper | V Wind | Exp T3.1'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/fv3_upper_va.png
+    plots:
+      - mapping:
+          projection: plcarr
+          domain: mid atlantic
+        add_map_features: ['coastline']
+        add_colorbar:
+          label: v Wind
+        add_grid:
+        layers:
+        - type: MapGridded
+          longitude:
+            variable: experiment::FV3Orog::geolon
+          latitude:
+            variable: experiment::FV3Orog::geolat
+          data:
+            variable: experiment::FV3Vars3D::va
+            slices: '[1,...]'
+          label: va
+          colorbar: true
+          cmap: 'bwr'
+          vmin: -3.0
+          vmax: 3.0
+
+  - batch figure:
+      variables: [T]
+    dynamic options:
+      - type: vminvmaxcmap
+        data variable: experiment::FV3Vars3D::T
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Increment | Exp T3.1 | T at Upper Model Layer'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/increment_T127_midatl_upper_domain.png
+    plots:
+      - mapping:
+          projection: plcarr
+          domain: mid atlantic
+        add_map_features: ['coastline']
+        add_colorbar:
+          label: 2m Temperature
+        add_grid:
+        layers:
+        - type: MapGridded
+          longitude:
+            variable: experiment::FV3Orog::geolon
+          latitude:
+            variable: experiment::FV3Orog::geolat
+          data:
+            variable: experiment::FV3Vars3D::T
+            slices: '[1,...]'
+          label:  'T at lowest layer'
+          colorbar: true
+          cmap: 'Spectral'
+          vmin: -15.0
+          vmax: 15.0
+
+  - batch figure:
+      variables: [T]
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Increment | Exp T3.1 | T at Upper Model Layer'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/increment_lat_T127_upper_T_line.png
+    plots:
+      - layers:
+        - type: LinePlot
+          x:
+            variable: experiment::FV3Orog::geolat
+            slices: '[280,0:50,4]'
+          y:
+            variable: experiment::FV3Vars3D::T
+            slices: '[1,280,0:50,4]'
+          color:  'red'
+        add_xlabel: 'Latitude'
+        add_ylabel: 'T Increment'
+
+  - batch figure:
+      variables: [T]
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Increment | Exp T3.1 | T at Lowest Model Layer'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/increment_lon_T127_upper_T_line.png
+    plots:
+      - layers:
+        - type: LinePlot
+          x:
+            variable: experiment::FV3Orog::geolon
+            slices: '[255:305,18,4]'
+          y:
+            variable: experiment::FV3Vars3D::T
+            slices: '[1,255:305,18,4]'
+          color:  'red'
+        add_xlabel: 'Longitude'
+        add_ylabel: 'T Increment'
+
+  - batch figure:
+      variables: [ua]
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Increment | Exp T3.1 | U Wind at Upper Model Layer'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/increment_lat_T127_upper_ua_line.png
+    plots:
+      - layers:
+        - type: LinePlot
+          x:
+            variable: experiment::FV3Orog::geolat
+            slices: '[280,0:50,4]'
+          y:
+            variable: experiment::FV3Vars3D::ua
+            slices: '[1,280,0:50,4]'
+          color:  'red'
+        add_xlabel: 'Latitude'
+        add_ylabel: 'T Increment'
+
+  - batch figure:
+      variables: [ua]
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Increment | Exp T3.1 | U Wind at Lowest Model Layer'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/increment_lon_T127_upper_ua_line.png
+    plots:
+      - layers:
+        - type: LinePlot
+          x:
+            variable: experiment::FV3Orog::geolon
+            slices: '[255:305,18,4]'
+          y:
+            variable: experiment::FV3Vars3D::ua
+            slices: '[1,255:305,18,4]'
+          color:  'red'
+        add_xlabel: 'Longitude'
+        add_ylabel: 'T Increment'
+
+  - batch figure:
+      variables: [va]
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Increment | Exp T3.1 | V Wind at Upper Model Layer'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/increment_lat_T127_upper_va_line.png
+    plots:
+      - layers:
+        - type: LinePlot
+          x:
+            variable: experiment::FV3Orog::geolat
+            slices: '[280,0:50,4]'
+          y:
+            variable: experiment::FV3Vars3D::va
+            slices: '[1,280,0:50,4]'
+          color:  'red'
+        add_xlabel: 'Latitude'
+        add_ylabel: 'T Increment'
+
+  - batch figure:
+      variables: [va]
+    figure:
+      figure size: [20,10]
+      layout: [1,1]
+      title: 'Increment | Exp T3.1 | V Wind at Lowest Model Layer'
+      output name: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T3.1/increment_lon_T127_upper_va_line.png
+    plots:
+      - layers:
+        - type: LinePlot
+          x:
+            variable: experiment::FV3Orog::geolon
+            slices: '[255:305,18,4]'
+          y:
+            variable: experiment::FV3Vars3D::va
+            slices: '[1,255:305,18,4]'
+          color:  'red'
+        add_xlabel: 'Longitude'
+        add_ylabel: 'T Increment'
+
+
+
+
+                       

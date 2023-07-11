@@ -1,0 +1,34 @@
+obsdataout: singleob.nc
+lockeys:
+  latitude: 39.5
+  longitude: -77.5
+  datetime: '2021-08-01T00:00:00Z'
+  pressure: 50000.1
+variable:
+  name: 'air_temperature'
+  obsvalue: 255
+  obserr: 0.1
+  preqc: 0 
+
+
+# observations:
+#
+#  - obs space:
+#      name: SingleOb
+#      obsdatain:
+#        engine:
+#          type: H5File
+#          obsfile: ./obs/singleob_v3.nc
+#      obsdataout:
+#        engine:
+#          type: H5File
+#          obsfile: ./diags/singleob_v3.nc
+#      simulated variables: [airTemperature]
+#    obs operator:
+#      name: VertInterp
+#      vertical coordinate: air_pressure
+#      observation vertical coordinate: pressure
+#      observation vertical coordinate group: MetaData
+#      interpolation method: log-linear
+
+
