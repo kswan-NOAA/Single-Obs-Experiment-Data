@@ -1,0 +1,3224 @@
+netcdf singleob_v3 {
+dimensions:
+	Location = 1 ;
+	nvars = 1 ;
+variables:
+	int Location(Location) ;
+		Location:suggested_chunk_dim = 1LL ;
+	float nvars(nvars) ;
+		nvars:suggested_chunk_dim = 100LL ;
+
+// global attributes:
+		string :_ioda_layout = "ObsGroup" ;
+		:_ioda_layout_version = 0 ;
+		:nvars = 1 ;
+		:nlocs = 1 ;
+		:date_time = 2021080100 ;
+data:
+
+ Location = 0 ;
+
+ nvars = 0 ;
+
+group: MetaData {
+  variables:
+  	int64 dateTime(Location) ;
+  		dateTime:_FillValue = -2208988800LL ;
+  		string dateTime:units = "seconds since 1970-01-01T00:00:00Z" ;
+  	float latitude(Location) ;
+  		latitude:_FillValue = 9.96921e+36f ;
+  	float longitude(Location) ;
+  		longitude:_FillValue = 9.96921e+36f ;
+  	float pressure(Location) ;
+  		pressure:_FillValue = 9.96921e+36f ;
+  	int sequenceNumber(Location) ;
+  		sequenceNumber:_FillValue = -2147483647 ;
+  	string variable_names(nvars) ;
+  		string variable_names:_FillValue = "" ;
+  data:
+
+   dateTime = 1627776000 ;
+
+   latitude = 0 ;
+
+   longitude = 0 ;
+
+   pressure = 100.1 ;
+
+   sequenceNumber = 1 ;
+
+   variable_names = "air_temperature" ;
+  } // group MetaData
+
+group: ObsError {
+  variables:
+  	float airTemperature(Location) ;
+  		airTemperature:_FillValue = 9.96921e+36f ;
+  data:
+
+   airTemperature = 1 ;
+  } // group ObsError
+
+group: ObsValue {
+  variables:
+  	float airTemperature(Location) ;
+  		airTemperature:_FillValue = 9.96921e+36f ;
+  data:
+
+   airTemperature = 261 ;
+  } // group ObsValue
+
+group: PreQC {
+  variables:
+  	int airTemperature(Location) ;
+  		airTemperature:_FillValue = -2147483647 ;
+  data:
+
+   airTemperature = 0 ;
+  } // group PreQC
+}
+ &SETUP
+   qoption=2,
+!  pseudo_q2=.false.,
+   mockbkg=.false.,
+ /
+ &GRIDOPTS
+   JCAP=766,JCAP_B=766,NLAT=770,NLON=1536,nsig=127,
+ /
+ &BKGERR
+   vs=0.7,
+   hzscl=1.0,1.0,1.0,
+   hswgt=1.0,0.0,0.0,
+   bw=0.0,norsp=4,
+   bkgv_flowdep=.false.,bkgv_rewgtfct=1.5,
+!  bkgv_flowdep=.true.,bkgv_rewgtfct=1.5,
+!  bkgv_write=.true.,
+!  bkgv_write_cv='cv_bundle',
+!  simcv=.true,
+!  bkgv_write_sv='sv_bundle',
+   simcv=.false,
+ /
+
+met_guess::
+!var     level   crtm_use    desc                 orig_name
+  ps        1      -1         surface_pressure     ps
+  z         1      -1         geopotential_height  phis
+  u       127       2         zonal_wind           u
+  v       127       2         meridional_wind      v
+# div     127      -1         zonal_wind           div
+# vor     127      -1         meridional_wind      vor
+  tv      127       2         virtial_temperature  tv
+  tsen    127       2         sensible_temperature tsen
+  q       127       2         specific_humidity    sphum
+  oz      127       2         ozone                o3mr
+# cw      127      10         cloud_condensate     cw
+  ql      127      12         Water                ql
+  qi      127      12         Ice                  qi
+# qr      127      12         Rain                 qrtot
+# qs      127      12         Snow                 qstot
+# qg      127      10         Graupel              qg
+# qh      127      10         Hail                 qh
+::
+
+state_derivatives::
+!var  level  src
+#ps   1      met_guess
+#u    127    met_guess
+#v    127    met_guess
+#tv   127    met_guess
+#q    127    met_guess
+#oz   127    met_guess
+#cw   127    met_guess
+#ql   127    met_guess
+#qi   127    met_guess
+#qr   127    met_guess
+#qs   127    met_guess
+#prse 128    met_guess
+#sst  central  --> I don't think this is needed
+::
+
+state_tendencies::
+!var  levels  source
+#prse 128     met_guess
+#oz   127     met_guess
+#u    127     met_guess
+#v    127     met_guess
+#tv   127     met_guess
+#q    127     met_guess
+#cw   127     met_guess
+#ql   127     met_guess
+#qi   127     met_guess
+#qr   127     met_guess
+#qs   127     met_guess
+::
+
+state_vector::
+!var     level  itracer source     funcof
+ u       127      0     met_guess    u
+ v       127      0     met_guess    v
+ tv      127      0     met_guess    tv
+ tsen    127      0     met_guess    tv,q
+ q       127      1     met_guess    q
+ oz      127      1     met_guess    oz
+#cw      127      1     met_guess    cw
+ ql      127      1     met_guess    ql
+ qi      127      1     met_guess    qi
+#qr      127      1     met_guess    qr
+#qs      127      1     met_guess    qs
+ prse    128      0     met_guess    prse
+#co      127      1     chem_guess   co
+#co2     127      1     chem_guess   co2
+ ps        1      0     met_guess    prse
+#sst       1      0     met_guess    sst
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof  be
+ sf      127      0       1.00        -1.0     state    u:v     -1.00
+ vp      127      0       1.00        -1.0     state    u:v     -1.00
+ ps        1      0       1.20        -1.0     state    prse    -1.00
+ t       127      0       1.50        -1.0     state    tv      -1.00
+ q       127      1       1.50        -1.0     state    q       -1.00
+ oz      127      1       2.00        -1.0     state    oz      -1.00
+ cw      127      1       1.00        -1.0     state    cw      -1.00
+#sst       1      0       1.00        -1.0     state    sst     -1.00
+#stl       1      0       3.00        -1.0     motley   sst     -1.00
+#sti       1      0       3.00        -1.0     motley   sst     -1.00
+::
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Configuration input file is: sample_var.yaml
+OOPS Starting 2023-07-17 12:33:44 (UTC-0500)
+Full configuration is:YAMLConfiguration[path=sample_var.yaml, root={cost function => {cost type => 3D-Var , window begin => 2021-07-31T21:00:00Z , window length => PT6H , analysis variables => (ua,va,t,ps,sphum,ice_wat,liq_wat,o3mr) , geometry => {fms initialization => {namelist filename => ./fv3jedi/fmsmpp.nml , field table filename => ./fv3jedi/field_table} , akbk => ./fv3jedi/akbk.nc4 , layout => (6,6) , npx => 769 , npy => 769 , npz => 127 , field metadata override => ./fv3jedi/gfs-restart.yaml} , background => {datapath => ./bkg , filetype => fms restart , datetime => 2021-08-01T00:00:00Z , filename_core => 20210801.000000.fv_core.res.nc , filename_trcr => 20210801.000000.fv_tracer.res.nc , filename_sfcd => 20210801.000000.sfc_data.nc , filename_sfcw => 20210801.000000.fv_srf_wnd.res.nc , filename_cplr => 20210801.000000.coupler.res , state variables => (ua,va,t,delp,ps,sphum,ice_wat,liq_wat,o3mr,phis,slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,u_srf,v_srf,f10m)} , background error => {covariance model => SABER , full inverse => true , saber central block => {saber block name => gsi covariance , read => {gsi akbk => fv3jedi/akbk.nc4 , gsi error covariance file => berror/gsi-coeffs-gfs-global.nc4 , gsi berror namelist file => berror_variable/gfs_gsi_global.nml , processor layout x direction => 18 , processor layout y direction => 12 , debugging mode => false}} , saber outer blocks => ({saber block name => gsi interpolation to model grid , gsi akbk => fv3jedi/akbk.nc4 , gsi error covariance file => berror/gsi-coeffs-gfs-global.nc4 , gsi berror namelist file => berror_variable/gfs_gsi_global.nml , processor layout x direction => 18 , processor layout y direction => 12 , debugging mode => false}) , linear variable change => {linear variable change name => Control2Analysis , input variables => (eastward_wind,northward_wind,air_temperature,surface_pressure,specific_humidity,cloud_liquid_ice,cloud_liquid_water,mole_fraction_of_ozone_in_air) , output variables => (ua,va,t,ps,sphum,ice_wat,liq_wat,o3mr)}} , observations => {observers => ({obs space => {name => SingleOb , obsdatain => {engine => {type => H5File , obsfile => ./obs/singleob_v3.nc}} , obsdataout => {engine => {type => H5File , obsfile => ./diags/singleob_v3.nc}} , simulated variables => (airTemperature)} , obs operator => {name => VertInterp , vertical coordinate => air_pressure , observation vertical coordinate => pressure , observation vertical coordinate group => MetaData , interpolation method => log-linear}})}} , variational => {minimizer => {algorithm => DRIPCG} , iterations => ({ninner => 40 , gradient norm reduction => 1e-10 , test => true , geometry => {fms initialization => {namelist filename => ./fv3jedi/fmsmpp.nml , field table filename => ./fv3jedi/field_table} , akbk => ./fv3jedi/akbk.nc4 , layout => (6,6) , npx => 385 , npy => 385 , npz => 127 , field metadata override => ./fv3jedi/gfs-restart.yaml} , diagnostics => {departures => bkgmob} , online diagnostics => {write increment => true , increment => {filetype => fms restart , datapath => /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T4.32 , prefix => iter2.3dvar.c24}}})} , final => {diagnostics => {departures => oman} , increment to latlon => {resolution in degrees => 5 , variables to output => (air_temperature,eastward_wind,northward_wind) , levels to output => (100,76,60) , datapath => /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T4.32 , filename prefix => latlon.inc.hyb-3dvar} , analysis to latlon => {resolution in degrees => 5 , variables to output => (air_temperature,eastward_wind,northward_wind) , levels to output => (100,76,60) , frequency => PT3H , datapath => /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T4.32 , filename prefix => latlon.an.hyb-3dvar}}}]
+OOPS_STATS ObjectCountHelper started.
+OOPS_STATS Run start                                - Runtime:      5.66 sec,  Memory: total:    45.59 Gb, per task: min =   208.15 Mb, max =   226.25 Mb
+Run: Starting oops::Variational<FV3JEDI, UFO and IODA observations>
+OOPS_STATS Variational start                        - Runtime:     5.66 sec,  Local Memory:   230.66 Mb
+NOTE from PE     0: MPP_DOMAINS_SET_STACK_SIZE: stack size set to    32768.
+ &MPP_IO_NML
+ HEADER_BUFFER_VAL       =       16384,
+ GLOBAL_FIELD_ON_ROOT_PE = T,
+ IO_CLOCKS_ON    = F,
+ SHUFFLE =           0,
+ DEFLATE_LEVEL   =          -1,
+ CF_COMPLIANCE   = F
+ /
+NOTE from PE     0: MPP_IO_SET_STACK_SIZE: stack size set to     131072.
+NOTE from PE     0: MPP_DOMAINS_SET_STACK_SIZE: stack size set to 24000000.
+ For k_split (remapping)=           1
+n_split is set to 01 for resolution-dt=0769x0769x6-  300.000
+Using n_sponge : 001
+Using non_ortho :       T
+ Starting PEs :          216
+ Starting Threads :            2
+ Cubic: cubed-sphere domain decomposition
+ Cubic: cubed-sphere domain decomposition
+ Cubic: cubed-sphere domain decomposition
+ Cubic: cubed-sphere domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ Cubic: cubed-sphere domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ Cubic: cubed-sphere domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ Cubic: cubed-sphere domain decomposition
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+ Cubic: cubed-sphere domain decomposition
+  X-AXIS =  128 128 128 128 128 128
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+  X-AXIS =  128 128 128 128 128 128
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+  X-AXIS =  128 128 128 128 128 128
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ ncnst=           8  num_prog=           8  pnats=           0  dnats=
+           0  num_family=           0
+ 
+ Gird distance at face edge (km)=   10211.8341663570     
+MAX    AREA (m*m): 0.20856239973372E+09          MIN AREA (m*m): 0.90412957446921E+08
+GLOBAL AREA (m*m): 0.51009649658647E+15 IDEAL GLOBAL AREA (m*m): 0.51009649655132E+15
+ 
+  Cubed-Sphere Grid Stats :          769 x         769 x           6
+   10211.8341663506        14441.7020080713        72317.3113856570     
+   10211.8341663506        14441.7020080713     
+      Grid Length               : min:  10211.83 max:  14441.70 avg:  72317.31 min/max:      0.71
+      Deviation from Orthogonal : min:      0.00 max:     29.94 avg:     53.09
+      Aspect Ratio              : min:      1.00 max:      1.06 avg:      6.10
+ 
+ var_gfs: computed model top (m)=   90.9884638254980       bottom/top dz=
+   16.5238759044367        10122.8526831467     
+ For (input) PINT=   75.0000000000000       KS=          43 pint(computed)=
+   76.1270774775719     
+ ptop =   1.00000000000000     
+ KS=          43 PINT (mb)=   76.1270774775719     
+           1  2.299870340230987E-002   10122.8526831467     
+           2  5.807713615902607E-002   6326.78292696670     
+           3  0.110789086252614        4487.08009004731     
+           4  0.179073131189213        3373.74442860699     
+           5  0.260423211451628        2677.57494333888     
+           6  0.353726514094036        2231.31245278240     
+           7  0.459448655244643        1940.27169807166     
+           8  0.580025523792907        1763.88336188332     
+           9  0.719691880533939        1657.78511455200     
+          10  0.884864375690111        1612.63143438910     
+          11   1.08184781811884        1568.70762100107     
+          12   1.31547103082967        1525.98017607108     
+          13   1.59105999917058        1484.41651368782     
+          14   1.91445310729165        1443.98493549399     
+          15   2.29201190413787        1404.65460651166     
+          16   2.73062688774661        1366.39553162613     
+          17   3.23771785968625        1329.17853271025     
+          18   3.82122847689726        1292.97522637183     
+          19   4.48961471426442        1257.75800230723     
+          20   5.25182704591857        1223.50000224439     
+          21   6.11728625425391        1190.17509945952     
+          22   7.09585288050421        1157.75787885168     
+          23   8.19779043692070        1126.22361756000     
+          24   9.43372260561037        1095.54826610895     
+          25   10.8145847504848        1065.70843006707     
+          26   12.3515701642485        1036.68135220532     
+          27   14.0560715598517        1008.44489514136     
+          28   15.9396183935512        980.977524456579     
+          29   18.0138106731671        954.258292272934     
+          30   20.2902499591542        928.266821277171     
+          31   22.7804683069122        902.983289180131     
+          32   25.4958559259113        878.388413599347     
+          33   28.4475883445917        854.463437353450     
+          34   31.6465538698591        831.190114157052     
+          35   35.1032821168508        808.550694705304     
+          36   38.8278743593005        786.527913137455     
+          37   42.8299364142957        765.104973869122     
+          38   47.1185147287102        744.265538783191     
+          39   51.7020362794515        723.993714769640     
+          40   56.5882528373320        704.274041604709     
+          41   61.7841900763523        685.091480160223     
+          42   67.2961019379860        666.431400934071     
+          43   73.1294305851670        648.279572893061     
+          44   79.2887722045399        630.622152619711     
+          45   85.7778488394930        613.445673754584     
+          46   92.5994863617950        596.737036726248     
+          47   99.7555986174313        580.483498760943     
+          48   107.247177713467        564.672664164340     
+          49   115.074290348294        549.292474868034     
+          50   123.236080028138        534.331201233495     
+          51   131.730774958791        519.777433106514     
+          52   140.555701353505        505.620071115287     
+          53   149.707301856236        491.848318205532     
+          54   159.181158743946        478.451671406159     
+          55   168.972021542610        465.419913819222     
+          56   179.073838668687        452.743106828037     
+          57   189.479792691109        440.411582517545     
+          58   200.182338797836        428.415936301113     
+          59   211.173246045558        416.747019748165     
+          60   222.443640970727        405.395933607164     
+          61   233.984053144325        394.354021018642     
+          62   245.784462261275        383.612860913076     
+          63   257.834346367504        373.164261588596     
+          64   270.122730843163        363.000254463614     
+          65   282.638237778606        353.113087999625     
+          66   295.369135400268        343.495221789519     
+          67   308.303387225806        334.139320806924     
+          68   321.428700651644        325.038249812183     
+          69   334.732574700691        316.185067910685     
+          70   348.202346683342        307.573023259420     
+          71   361.825237550449        299.195547917724     
+          72   375.588395742457        291.046252838253     
+          73   389.478939364134        283.118922994409     
+          74   403.483996538943        275.407512640476     
+          75   417.590743820979        267.906140700852     
+          76   431.786442565283        260.609086284876     
+          77   446.058473179160        253.510784323809     
+          78   460.394367197701        246.605821326662     
+          79   474.781837145962        239.888931251618     
+          80   489.208804168177        233.354991489900     
+          81   503.663423420843        226.999018959047     
+          82   518.134107241549        220.816166302575     
+          83   532.609546119055        214.801718193166     
+          84   547.078727502308        208.951087736543     
+          85   561.530952496855        203.259812973291     
+          86   575.955850506592        197.723553475964     
+          87   590.343391886918        192.338087038875     
+          88   604.683898682275        187.099306458050     
+          89   618.968053526781        182.003216398881     
+          90   633.186906791310        177.045930349106     
+          91   647.331882063962        172.223667654772     
+          92   661.394780053497        167.532750636938     
+          93   675.367781007122        162.969601786905     
+          94   689.243445734930        158.530741037845     
+          95   703.014715333570        154.212783110745     
+          96   716.674909701310        150.012434932631     
+          97   730.217724935652        145.926493125127     
+          98   743.637229703176        141.951841561407     
+          99   756.927860669321        138.085448989696     
+         100   770.084417073499        134.324366721494     
+         101   783.102054532269        130.665726382777     
+         102   795.976278150376        127.106737726436     
+         103   808.653371936263        122.683423253556     
+         104   821.072756987867        118.260108780677     
+         105   833.216472512040        113.836794307796     
+         106   845.066753142085        109.413479834916     
+         107   856.606071870864        104.990165362037     
+         108   867.817182935137        100.566850889157     
+         109   878.683164505506        96.1435364162764     
+         110   889.187461035082        91.7202219433965     
+         111   899.313925119381        87.2969074705165     
+         112   909.046858719979        82.8735929976366     
+         113   918.371053605177        78.4502785247565     
+         114   927.271830862274        74.0269640518766     
+         115   935.735079338108        69.6036495789966     
+         116   943.747292867219        65.1803351061166     
+         117   951.295606150359        60.7570206332367     
+         118   958.367829150089        56.3337061603567     
+         119   964.952479874857        51.9103916874766     
+         120   971.038815428227        47.4870772145967     
+         121   976.616861205781        43.0637627417167     
+         122   981.677438128665        38.6404482688367     
+         123   986.212187809718        34.2171337959567     
+         124   990.213595555636        29.7938193230767     
+         125   993.675011116558        25.3705048501967     
+         126   996.590667102888        20.9471903773167     
+         127   998.955694997978        16.5238759044367     
+ Hybrid Sigma-P: minimum allowable surface pressure (hpa)=
+   141.745234278430     
+ Corner interpolation coefficient=   1.49914998344488     
+ Corner interpolation coefficient=   1.49914998344488     
+ Corner interpolation coefficient=   1.49914998344479     
+ Corner interpolation coefficient=   1.49914998344498     
+klev           ak           bk      p_ref
+   1      1.00000      0.00000       1.00
+   2      3.59974      0.00000       3.60
+   3      8.01569      0.00000       8.02
+   4     14.14213      0.00000      14.14
+   5     21.67250      0.00000      21.67
+   6     30.41215      0.00000      30.41
+   7     40.33316      0.00000      40.33
+   8     51.55657      0.00000      51.56
+   9     64.44853      0.00000      64.45
+  10     79.48985      0.00000      79.49
+  11     97.48303      0.00000      97.48
+  12    118.88653      0.00000     118.89
+  13    144.20767      0.00000     144.21
+  14    174.00433      0.00000     174.00
+  15    208.88629      0.00000     208.89
+  16    249.51609      0.00000     249.52
+  17    296.60929      0.00000     296.61
+  18    350.93428      0.00000     350.93
+  19    413.31141      0.00000     413.31
+  20    484.61153      0.00000     484.61
+  21    565.75388      0.00000     565.75
+  22    657.70337      0.00000     657.70
+  23    761.46720      0.00000     761.47
+  24    878.09088      0.00000     878.09
+  25   1008.65364      0.00000    1008.65
+  26   1154.26331      0.00000    1154.26
+  27   1316.05072      0.00000    1316.05
+  28   1495.16359      0.00000    1495.16
+  29   1692.76009      0.00000    1692.76
+  30   1910.00205      0.00000    1910.00
+  31   2148.04795      0.00000    2148.05
+  32   2408.04572      0.00000    2408.05
+  33   2691.12547      0.00000    2691.13
+  34   2998.39220      0.00000    2998.39
+  35   3330.91857      0.00000    3330.92
+  36   3689.73785      0.00000    3689.74
+  37   4075.83702      0.00000    4075.84
+  38   4490.15026      0.00000    4490.15
+  39   4933.55269      0.00000    4933.55
+  40   5406.85457      0.00000    5406.85
+  41   5910.79600      0.00000    5910.80
+  42   6446.04202      0.00000    6446.04
+  43   7013.17837      0.00000    7013.18
+  44   7612.70775      0.00000    7612.71
+  45   8188.20957      0.00057    8245.05
+  46   8688.98523      0.00222    8910.52
+  47   9123.14474      0.00486    9609.37
+  48   9497.72972      0.00844   10341.75
+  49   9818.87219      0.01289   11107.69
+  50  10091.92812      0.01815   11907.17
+  51  10321.59001      0.02418   12740.05
+  52  10511.98190      0.03094   13606.11
+  53  10666.73989      0.03838   14505.03
+  54  10789.08039      0.04647   15436.43
+  55  10881.85808      0.05518   16399.80
+  56  10947.61532      0.06447   17394.60
+  57  10988.62422      0.07432   18420.17
+  58  11006.92259      0.08469   19475.79
+  59  11004.34472      0.09556   20560.68
+  60  10982.54769      0.10691   21673.97
+  61  10943.03398      0.11872   22814.76
+  62  10887.17082      0.13095   23982.05
+  63  10816.20693      0.14359   25174.84
+  64  10731.28677      0.15661   26392.03
+  65  10633.46298      0.16999   27632.51
+  66  10523.70697      0.18371   28895.13
+  67  10402.91811      0.19776   30178.69
+  68  10271.93171      0.21210   31481.98
+  69  10131.52578      0.22672   32803.76
+  70   9982.42707      0.24160   34142.76
+  71   9825.31611      0.25672   35497.71
+  72   9660.83169      0.27207   36867.34
+  73   9489.57472      0.28761   38250.34
+  74   9312.11156      0.30333   39645.44
+  75   9128.97697      0.31922   41051.35
+  76   8940.67659      0.33526   42466.79
+  77   8747.68917      0.35143   43890.49
+  78   8550.46853      0.36771   45321.20
+  79   8349.44523      0.38408   46757.67
+  80   8145.02807      0.40054   48198.69
+  81   7937.60538      0.41705   49643.07
+  82   7727.54623      0.43362   51089.62
+  83   7515.20141      0.45022   52537.20
+  84   7300.90441      0.46684   53984.71
+  85   7084.97219      0.48346   55431.04
+  86   6867.70599      0.50007   56875.15
+  87   6649.39198      0.51667   58316.02
+  88   6430.30187      0.53322   59752.66
+  89   6210.69353      0.54973   61184.12
+  90   5990.81147      0.56619   62609.49
+  91   5770.88738      0.58257   64027.89
+  92   5551.14058      0.59887   65438.49
+  93   5331.77847      0.61509   66840.47
+  94   5112.99692      0.63120   68233.09
+  95   4894.98071      0.64721   69615.60
+  96   4677.90391      0.66309   70987.34
+  97   4461.93021      0.67886   72347.64
+  98   4247.21334      0.69449   73695.90
+  99   4033.89738      0.70998   75031.54
+ 100   3822.11712      0.72532   76354.03
+ 101   3611.99836      0.74051   77662.85
+ 102   3403.65829      0.75554   78957.56
+ 103   3197.20576      0.77040   80237.70
+ 104   2994.34514      0.78499   81492.97
+ 105   2795.41189      0.79926   82721.58
+ 106   2600.73700      0.81321   83921.72
+ 107   2410.64631      0.82681   85091.63
+ 108   2225.45985      0.84004   86229.58
+ 109   2045.49121      0.85288   87333.85
+ 110   1871.04679      0.86532   88402.78
+ 111   1702.42520      0.87732   89434.71
+ 112   1539.91656      0.88888   90428.07
+ 113   1383.80185      0.89997   91381.30
+ 114   1234.35228      0.91059   92292.91
+ 115   1091.82866      0.92070   93161.46
+ 116    956.48076      0.93029   93985.56
+ 117    828.54677      0.93935   94763.90
+ 118    708.25266      0.94787   95495.22
+ 119    595.81169      0.95583   96178.34
+ 120    491.42386      0.96321   96812.15
+ 121    395.27541      0.97000   97395.61
+ 122    307.53840      0.97620   97927.76
+ 123    228.37020      0.98179   98407.73
+ 124    157.91319      0.98677   98834.71
+ 125     96.29433      0.99112   99208.01
+ 126     43.62485      0.99483   99526.99
+ 127     -0.00000      0.99791   99791.14
+ 128      0.00000      1.00000  100000.00
+ Grid_init         127          43   1.00000000000000     
+ Hybrid Sigma-P: minimum allowable surface pressure (hpa)=
+   141.745234278430     
+ Corner interpolation coefficient=   1.49914998344459     
+ Corner interpolation coefficient=   1.49914998344469     
+ da_max/da_min=   2.30677555101721     
+ da_max_c/da_min_c=   2.30808553048304     
+  
+ Divergence damping Coefficients
+ For small dt=   300.000000000000     
+ External mode del-2 (m**2/s)=   6024.11724189548     
+ Internal mode del-2 SMAG dimensionless coeff=  0.000000000000000E+000
+ Internal mode del-2 background diff=  0.000000000000000E+000
+ Internal mode del-4 background diff=  0.160000000000000     
+ Vorticity del-4 (m**4/s)=  0.000000000000000E+000
+ tracer del-2 diff=  0.000000000000000E+000
+ Vorticity del-4 (m**4/s)=  0.000000000000000E+000
+ beta=  0.000000000000000E+000
+  
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =  128 128 128 128 128 128
+  Y-AXIS =  128 128 128 128 128 128
+GeometryData: Global tree size = 3538944, footprint = 226492416
+SingleOb: read database from ./obs/singleob_v3.nc (io pool size: 216)
+SingleOb processed vars: 1 variables: airTemperature
+SingleOb assimilated vars: 1 variables: airTemperature
+
+WARNING from PE     0: The function named string has been moved from fms_io_mod to fms_mod.  Please update your call.
+
+
+WARNING from PE     0: The function named string has been moved from fms_io_mod to fms_mod.  Please update your call.
+
+NOTE from PE     0: MPP_IO_SET_STACK_SIZE: stack size set to    2080768.
+All variables / channels are bias-corrected.
+3DVar window: begin = 2021-07-31T21:00:00Z, end = 2021-08-01T03:00:00Z
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+OOPS_STATS IncrementalAssimilation start            - Runtime:    17.92 sec,  Local Memory:     1.06 Gb
+Running incremental assimilation with 1 outer iterations.
+Minimizer algorithm=DRIPCG
+QNewtonLMP: maxouter : 1
+IncrementalAssimilation: Configuration for outer iteration 0:
+LocalConfiguration[root={ninner => 40 , gradient norm reduction => 1e-10 , test => true , geometry => {fms initialization => {namelist filename => ./fv3jedi/fmsmpp.nml , field table filename => ./fv3jedi/field_table} , akbk => ./fv3jedi/akbk.nc4 , layout => (6,6) , npx => 385 , npy => 385 , npz => 127 , field metadata override => ./fv3jedi/gfs-restart.yaml} , diagnostics => {departures => bkgmob} , online diagnostics => {write increment => true , increment => {filetype => fms restart , datapath => /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T4.32 , prefix => iter2.3dvar.c24}} , iteration => 0}]
+OOPS_STATS IncrementalAssimilation iteration 0      - Runtime:    17.92 sec,  Local Memory:     1.06 Gb
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &NEST_NML
+ DUM
+ /
+ &FV_NEST_NML
+ GRID_PES,
+ GRID_COARSE,
+ TILE_COARSE,
+ NEST_REFINE,
+ NEST_IOFFSETS,
+ NEST_JOFFSETS,
+ P_SPLIT
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &FV_GRID_NML
+ GRID_NAME,
+ GRID_FILE,
+ MOSAIC_PATH
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ &TEST_CASE_NML
+ TEST_CASE,
+ BUBBLE_DO,
+ ALPHA,
+ NSOLITONS,
+ SOLITON_UMAX,
+ SOLITON_SIZE
+ /
+ For k_split (remapping)=           1
+n_split is set to 01 for resolution-dt=0385x0385x6-  300.000
+Using n_sponge : 001
+Using non_ortho :       T
+ Starting PEs :          216
+ Starting Threads :            2
+ Cubic: cubed-sphere domain decomposition
+ Cubic: cubed-sphere domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+ Cubic: cubed-sphere domain decomposition
+ Cubic: cubed-sphere domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ Cubic: cubed-sphere domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ Cubic: cubed-sphere domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+ Cubic: cubed-sphere domain decomposition
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+  X-AXIS =   64  64  64  64  64  64
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ Cubic: cubed-sphere domain decomposition
+whalo =    1, ehalo =    1, shalo =    1, nhalo =    1
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ ncnst=           8  num_prog=           8  pnats=           0  dnats=
+           0  num_family=           0
+ 
+ Gird distance at face edge (km)=   20423.6683327115     
+MAX    AREA (m*m): 0.83424102617308E+09          MIN AREA (m*m): 0.36206275657188E+09
+GLOBAL AREA (m*m): 0.51009649656010E+15 IDEAL GLOBAL AREA (m*m): 0.51009649655132E+15
+ 
+  Cubed-Sphere Grid Stats :          385 x         385 x           6
+   20423.6683327058        28883.3298147678        144647.099517218     
+   20423.6683327058        28883.3298147678     
+      Grid Length               : min:  20423.67 max:  28883.33 avg: 144647.10 min/max:      0.71
+      Deviation from Orthogonal : min:      0.00 max:     29.89 avg:     53.06
+      Aspect Ratio              : min:      1.00 max:      1.06 avg:      6.10
+ 
+ var_gfs: computed model top (m)=   90.9884638254980       bottom/top dz=
+   16.5238759044367        10122.8526831467     
+ For (input) PINT=   75.0000000000000       KS=          43 pint(computed)=
+   76.1270774775719     
+ ptop =   1.00000000000000     
+ KS=          43 PINT (mb)=   76.1270774775719     
+           1  2.299870340230987E-002   10122.8526831467     
+           2  5.807713615902607E-002   6326.78292696670     
+           3  0.110789086252614        4487.08009004731     
+           4  0.179073131189213        3373.74442860699     
+           5  0.260423211451628        2677.57494333888     
+           6  0.353726514094036        2231.31245278240     
+           7  0.459448655244643        1940.27169807166     
+           8  0.580025523792907        1763.88336188332     
+           9  0.719691880533939        1657.78511455200     
+          10  0.884864375690111        1612.63143438910     
+          11   1.08184781811884        1568.70762100107     
+          12   1.31547103082967        1525.98017607108     
+          13   1.59105999917058        1484.41651368782     
+          14   1.91445310729165        1443.98493549399     
+          15   2.29201190413787        1404.65460651166     
+          16   2.73062688774661        1366.39553162613     
+          17   3.23771785968625        1329.17853271025     
+          18   3.82122847689726        1292.97522637183     
+          19   4.48961471426442        1257.75800230723     
+          20   5.25182704591857        1223.50000224439     
+          21   6.11728625425391        1190.17509945952     
+          22   7.09585288050421        1157.75787885168     
+          23   8.19779043692070        1126.22361756000     
+          24   9.43372260561037        1095.54826610895     
+          25   10.8145847504848        1065.70843006707     
+          26   12.3515701642485        1036.68135220532     
+          27   14.0560715598517        1008.44489514136     
+          28   15.9396183935512        980.977524456579     
+          29   18.0138106731671        954.258292272934     
+          30   20.2902499591542        928.266821277171     
+          31   22.7804683069122        902.983289180131     
+          32   25.4958559259113        878.388413599347     
+          33   28.4475883445917        854.463437353450     
+          34   31.6465538698591        831.190114157052     
+          35   35.1032821168508        808.550694705304     
+          36   38.8278743593005        786.527913137455     
+          37   42.8299364142957        765.104973869122     
+          38   47.1185147287102        744.265538783191     
+          39   51.7020362794515        723.993714769640     
+          40   56.5882528373320        704.274041604709     
+          41   61.7841900763523        685.091480160223     
+          42   67.2961019379860        666.431400934071     
+          43   73.1294305851670        648.279572893061     
+          44   79.2887722045399        630.622152619711     
+          45   85.7778488394930        613.445673754584     
+          46   92.5994863617950        596.737036726248     
+          47   99.7555986174313        580.483498760943     
+          48   107.247177713467        564.672664164340     
+          49   115.074290348294        549.292474868034     
+          50   123.236080028138        534.331201233495     
+          51   131.730774958791        519.777433106514     
+          52   140.555701353505        505.620071115287     
+          53   149.707301856236        491.848318205532     
+          54   159.181158743946        478.451671406159     
+          55   168.972021542610        465.419913819222     
+          56   179.073838668687        452.743106828037     
+          57   189.479792691109        440.411582517545     
+          58   200.182338797836        428.415936301113     
+          59   211.173246045558        416.747019748165     
+          60   222.443640970727        405.395933607164     
+          61   233.984053144325        394.354021018642     
+          62   245.784462261275        383.612860913076     
+          63   257.834346367504        373.164261588596     
+          64   270.122730843163        363.000254463614     
+          65   282.638237778606        353.113087999625     
+          66   295.369135400268        343.495221789519     
+          67   308.303387225806        334.139320806924     
+          68   321.428700651644        325.038249812183     
+          69   334.732574700691        316.185067910685     
+          70   348.202346683342        307.573023259420     
+          71   361.825237550449        299.195547917724     
+          72   375.588395742457        291.046252838253     
+          73   389.478939364134        283.118922994409     
+          74   403.483996538943        275.407512640476     
+          75   417.590743820979        267.906140700852     
+          76   431.786442565283        260.609086284876     
+          77   446.058473179160        253.510784323809     
+          78   460.394367197701        246.605821326662     
+          79   474.781837145962        239.888931251618     
+          80   489.208804168177        233.354991489900     
+          81   503.663423420843        226.999018959047     
+          82   518.134107241549        220.816166302575     
+          83   532.609546119055        214.801718193166     
+          84   547.078727502308        208.951087736543     
+          85   561.530952496855        203.259812973291     
+          86   575.955850506592        197.723553475964     
+          87   590.343391886918        192.338087038875     
+          88   604.683898682275        187.099306458050     
+ Corner interpolation coefficient=   1.49829998332002     
+          89   618.968053526781        182.003216398881     
+          90   633.186906791310        177.045930349106     
+          91   647.331882063962        172.223667654772     
+          92   661.394780053497        167.532750636938     
+          93   675.367781007122        162.969601786905     
+          94   689.243445734930        158.530741037845     
+          95   703.014715333570        154.212783110745     
+          96   716.674909701310        150.012434932631     
+          97   730.217724935652        145.926493125127     
+          98   743.637229703176        141.951841561407     
+          99   756.927860669321        138.085448989696     
+         100   770.084417073499        134.324366721494     
+         101   783.102054532269        130.665726382777     
+         102   795.976278150376        127.106737726436     
+         103   808.653371936263        122.683423253556     
+         104   821.072756987867        118.260108780677     
+         105   833.216472512040        113.836794307796     
+         106   845.066753142085        109.413479834916     
+         107   856.606071870864        104.990165362037     
+         108   867.817182935137        100.566850889157     
+         109   878.683164505506        96.1435364162764     
+         110   889.187461035082        91.7202219433965     
+         111   899.313925119381        87.2969074705165     
+         112   909.046858719979        82.8735929976366     
+         113   918.371053605177        78.4502785247565     
+         114   927.271830862274        74.0269640518766     
+         115   935.735079338108        69.6036495789966     
+         116   943.747292867219        65.1803351061166     
+         117   951.295606150359        60.7570206332367     
+         118   958.367829150089        56.3337061603567     
+         119   964.952479874857        51.9103916874766     
+         120   971.038815428227        47.4870772145967     
+         121   976.616861205781        43.0637627417167     
+         122   981.677438128665        38.6404482688367     
+         123   986.212187809718        34.2171337959567     
+         124   990.213595555636        29.7938193230767     
+         125   993.675011116558        25.3705048501967     
+         126   996.590667102888        20.9471903773167     
+         127   998.955694997978        16.5238759044367     
+ Hybrid Sigma-P: minimum allowable surface pressure (hpa)=
+   141.745234278430     
+klev           ak           bk      p_ref
+   1      1.00000      0.00000       1.00
+   2      3.59974      0.00000       3.60
+   3      8.01569      0.00000       8.02
+   4     14.14213      0.00000      14.14
+   5     21.67250      0.00000      21.67
+   6     30.41215      0.00000      30.41
+   7     40.33316      0.00000      40.33
+   8     51.55657      0.00000      51.56
+   9     64.44853      0.00000      64.45
+  10     79.48985      0.00000      79.49
+  11     97.48303      0.00000      97.48
+  12    118.88653      0.00000     118.89
+  13    144.20767      0.00000     144.21
+  14    174.00433      0.00000     174.00
+  15    208.88629      0.00000     208.89
+  16    249.51609      0.00000     249.52
+  17    296.60929      0.00000     296.61
+  18    350.93428      0.00000     350.93
+  19    413.31141      0.00000     413.31
+  20    484.61153      0.00000     484.61
+  21    565.75388      0.00000     565.75
+  22    657.70337      0.00000     657.70
+  23    761.46720      0.00000     761.47
+  24    878.09088      0.00000     878.09
+  25   1008.65364      0.00000    1008.65
+  26   1154.26331      0.00000    1154.26
+  27   1316.05072      0.00000    1316.05
+  28   1495.16359      0.00000    1495.16
+  29   1692.76009      0.00000    1692.76
+  30   1910.00205      0.00000    1910.00
+  31   2148.04795      0.00000    2148.05
+  32   2408.04572      0.00000    2408.05
+  33   2691.12547      0.00000    2691.13
+  34   2998.39220      0.00000    2998.39
+  35   3330.91857      0.00000    3330.92
+  36   3689.73785      0.00000    3689.74
+  37   4075.83702      0.00000    4075.84
+  38   4490.15026      0.00000    4490.15
+  39   4933.55269      0.00000    4933.55
+  40   5406.85457      0.00000    5406.85
+  41   5910.79600      0.00000    5910.80
+  42   6446.04202      0.00000    6446.04
+  43   7013.17837      0.00000    7013.18
+  44   7612.70775      0.00000    7612.71
+  45   8188.20957      0.00057    8245.05
+  46   8688.98523      0.00222    8910.52
+  47   9123.14474      0.00486    9609.37
+  48   9497.72972      0.00844   10341.75
+  49   9818.87219      0.01289   11107.69
+  50  10091.92812      0.01815   11907.17
+  51  10321.59001      0.02418   12740.05
+  52  10511.98190      0.03094   13606.11
+  53  10666.73989      0.03838   14505.03
+  54  10789.08039      0.04647   15436.43
+  55  10881.85808      0.05518   16399.80
+  56  10947.61532      0.06447   17394.60
+  57  10988.62422      0.07432   18420.17
+  58  11006.92259      0.08469   19475.79
+  59  11004.34472      0.09556   20560.68
+  60  10982.54769      0.10691   21673.97
+  61  10943.03398      0.11872   22814.76
+  62  10887.17082      0.13095   23982.05
+  63  10816.20693      0.14359   25174.84
+  64  10731.28677      0.15661   26392.03
+  65  10633.46298      0.16999   27632.51
+  66  10523.70697      0.18371   28895.13
+  67  10402.91811      0.19776   30178.69
+  68  10271.93171      0.21210   31481.98
+  69  10131.52578      0.22672   32803.76
+  70   9982.42707      0.24160   34142.76
+  71   9825.31611      0.25672   35497.71
+  72   9660.83169      0.27207   36867.34
+  73   9489.57472      0.28761   38250.34
+  74   9312.11156      0.30333   39645.44
+  75   9128.97697      0.31922   41051.35
+  76   8940.67659      0.33526   42466.79
+  77   8747.68917      0.35143   43890.49
+  78   8550.46853      0.36771   45321.20
+  79   8349.44523      0.38408   46757.67
+  80   8145.02807      0.40054   48198.69
+  81   7937.60538      0.41705   49643.07
+  82   7727.54623      0.43362   51089.62
+  83   7515.20141      0.45022   52537.20
+  84   7300.90441      0.46684   53984.71
+  85   7084.97219      0.48346   55431.04
+  86   6867.70599      0.50007   56875.15
+  87   6649.39198      0.51667   58316.02
+  88   6430.30187      0.53322   59752.66
+  89   6210.69353      0.54973   61184.12
+  90   5990.81147      0.56619   62609.49
+  91   5770.88738      0.58257   64027.89
+  92   5551.14058      0.59887   65438.49
+  93   5331.77847      0.61509   66840.47
+  94   5112.99692      0.63120   68233.09
+  95   4894.98071      0.64721   69615.60
+  96   4677.90391      0.66309   70987.34
+  97   4461.93021      0.67886   72347.64
+  98   4247.21334      0.69449   73695.90
+  99   4033.89738      0.70998   75031.54
+ 100   3822.11712      0.72532   76354.03
+ 101   3611.99836      0.74051   77662.85
+ 102   3403.65829      0.75554   78957.56
+ 103   3197.20576      0.77040   80237.70
+ 104   2994.34514      0.78499   81492.97
+ 105   2795.41189      0.79926   82721.58
+ 106   2600.73700      0.81321   83921.72
+ 107   2410.64631      0.82681   85091.63
+ 108   2225.45985      0.84004   86229.58
+ 109   2045.49121      0.85288   87333.85
+ 110   1871.04679      0.86532   88402.78
+ 111   1702.42520      0.87732   89434.71
+ 112   1539.91656      0.88888   90428.07
+ 113   1383.80185      0.89997   91381.30
+ 114   1234.35228      0.91059   92292.91
+ 115   1091.82866      0.92070   93161.46
+ 116    956.48076      0.93029   93985.56
+ 117    828.54677      0.93935   94763.90
+ 118    708.25266      0.94787   95495.22
+ 119    595.81169      0.95583   96178.34
+ 120    491.42386      0.96321   96812.15
+ 121    395.27541      0.97000   97395.61
+ 122    307.53840      0.97620   97927.76
+ 123    228.37020      0.98179   98407.73
+ 124    157.91319      0.98677   98834.71
+ 125     96.29433      0.99112   99208.01
+ 126     43.62485      0.99483   99526.99
+ 127     -0.00000      0.99791   99791.14
+ 128      0.00000      1.00000  100000.00
+ Grid_init         127          43   1.00000000000000     
+ Hybrid Sigma-P: minimum allowable surface pressure (hpa)=
+   141.745234278430     
+ Corner interpolation coefficient=   1.49829998332003     
+ Corner interpolation coefficient=   1.49829998332023     
+ Corner interpolation coefficient=   1.49829998332012     
+ Corner interpolation coefficient=   1.49829998332017     
+ Corner interpolation coefficient=   1.49829998332030     
+ da_max/da_min=   2.30413377523808     
+ da_max_c/da_min_c=   2.30675628536704     
+  
+ Divergence damping Coefficients
+ For small dt=   300.000000000000     
+ External mode del-2 (m**2/s)=   24110.1994687789     
+ Internal mode del-2 SMAG dimensionless coeff=  0.000000000000000E+000
+ Internal mode del-2 background diff=  0.000000000000000E+000
+ Internal mode del-4 background diff=  0.160000000000000     
+ Vorticity del-4 (m**4/s)=  0.000000000000000E+000
+ tracer del-2 diff=  0.000000000000000E+000
+ Vorticity del-4 (m**4/s)=  0.000000000000000E+000
+ beta=  0.000000000000000E+000
+  
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+ cubic_grid domain decomposition
+whalo =    3, ehalo =    3, shalo =    3, nhalo =    3
+  X-AXIS =   64  64  64  64  64  64
+  Y-AXIS =   64  64  64  64  64  64
+GeometryData: Global tree size = 884736, footprint = 56623104
+ObsErrorDiag covariance updated 1
+Observer::finalize QC = 
+SingleOb airTemperature nlocs = 1, nobs = 1, min = 0, max = 0, avg = 0
+Jo Observations:
+SingleOb nobs= 1 Min=261, Max=261, RMS=261
+
+End Jo Observations
+Jo Observations Equivalent:
+SingleOb nobs= 1 Min=253.223, Max=253.223, RMS=253.223
+
+End Jo Observations Equivalent
+Jo Bias Corrected Departures:
+SingleOb nobs= 1 Min=-7.77747, Max=-7.77747, RMS=7.77747
+
+End Jo Bias Corrected Departures
+Jo Observations Errors:
+Diagonal observation error covariance
+SingleOb nobs= 1 Min=1, Max=1, RMS=1
+
+End Jo Observations Errors
+CostJo   : Nonlinear Jo(SingleOb) = 30.2445, nobs = 1, Jo/n = 30.2445, err = 1
+CostJo   : Nonlinear Jo = 30.2445
+Info     : Prepare ensemble configuration
+Info     : Read full ensemble
+Info     : Creating outer blocks
+Info     : Creating outer block: gsi interpolation to model grid
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     1      1      1     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     2      1     87     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     3      1    173     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     4      1    259     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     5      1    345     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     6      1    431     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     7      1    517     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     8      1    602     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     9      1    687     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    10      1    772     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    11      1    857     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    12      1    942     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    13      1   1027     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    14      1   1112     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    15      1   1197     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    16      1   1282     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    17      1   1367     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    18      1   1452     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    19     66      1     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    20     66     87     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    21     66    173     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    22     66    259     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    23     66    345     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    24     66    431     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    25     66    517     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    26     66    602     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    27     66    687     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    28     66    772     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    29     66    857     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    30     66    942     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    31     66   1027     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    32     66   1112     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    33     66   1197     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    34     66   1282     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    35     66   1367     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    36     66   1452     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    37    131      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    38    131     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    39    131    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    40    131    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    41    131    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    42    131    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    43    131    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    44    131    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    45    131    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    46    131    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    47    131    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    48    131    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    49    131   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    50    131   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    51    131   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    52    131   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    53    131   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    54    131   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    55    195      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    56    195     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    57    195    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    58    195    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    59    195    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    60    195    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    61    195    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    62    195    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    63    195    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    64    195    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    65    195    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    66    195    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    67    195   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    68    195   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    69    195   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    70    195   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    71    195   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    72    195   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    73    259      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    74    259     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    75    259    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    76    259    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    77    259    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    78    259    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    79    259    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    80    259    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    81    259    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    82    259    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    83    259    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    84    259    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    85    259   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    86    259   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    87    259   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    88    259   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    89    259   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    90    259   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    91    323      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    92    323     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    93    323    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    94    323    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    95    323    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    96    323    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    97    323    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    98    323    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    99    323    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   100    323    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   101    323    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   102    323    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   103    323   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   104    323   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   105    323   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   106    323   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   107    323   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   108    323   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   109    387      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   110    387     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   111    387    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   112    387    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   113    387    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   114    387    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   115    387    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   116    387    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   117    387    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   118    387    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   119    387    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   120    387    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   121    387   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   122    387   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   123    387   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   124    387   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   125    387   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   126    387   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   127    451      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   128    451     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   129    451    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   130    451    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   131    451    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   132    451    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   133    451    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   134    451    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   135    451    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   136    451    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   137    451    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   138    451    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   139    451   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   140    451   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   141    451   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   142    451   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   143    451   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   144    451   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   145    515      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   146    515     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   147    515    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   148    515    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   149    515    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   150    515    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   151    515    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   152    515    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   153    515    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   154    515    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   155    515    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   156    515    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   157    515   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   158    515   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   159    515   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   160    515   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   161    515   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   162    515   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   163    579      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   164    579     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   165    579    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   166    579    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   167    579    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   168    579    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   169    579    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   170    579    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   171    579    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   172    579    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   173    579    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   174    579    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   175    579   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   176    579   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   177    579   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   178    579   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   179    579   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   180    579   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   181    643      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   182    643     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   183    643    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   184    643    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   185    643    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   186    643    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   187    643    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   188    643    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   189    643    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   190    643    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   191    643    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   192    643    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   193    643   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   194    643   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   195    643   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   196    643   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   197    643   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   198    643   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   199    707      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   200    707     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   201    707    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   202    707    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   203    707    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   204    707    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   205    707    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   206    707    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   207    707    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   208    707    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   209    707    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   210    707    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   211    707   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   212    707   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   213    707   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   214    707   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   215    707   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   216    707   1452     64     85   5590
+ *** Finish reading file: fv3jedi/akbk.nc4
+Info     : Creating central block: gsi covariance
+Info     : Read data
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     1      1      1     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     2      1     87     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     3      1    173     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     4      1    259     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     5      1    345     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     6      1    431     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     7      1    517     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     8      1    602     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=     9      1    687     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    10      1    772     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    11      1    857     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    12      1    942     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    13      1   1027     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    14      1   1112     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    15      1   1197     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    16      1   1282     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    17      1   1367     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    18      1   1452     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    19     66      1     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    20     66     87     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    21     66    173     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    22     66    259     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    23     66    345     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    24     66    431     65     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    25     66    517     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    26     66    602     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    27     66    687     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    28     66    772     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    29     66    857     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    30     66    942     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    31     66   1027     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    32     66   1112     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    33     66   1197     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    34     66   1282     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    35     66   1367     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    36     66   1452     65     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    37    131      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    38    131     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    39    131    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    40    131    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    41    131    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    42    131    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    43    131    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    44    131    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    45    131    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    46    131    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    47    131    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    48    131    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    49    131   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    50    131   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    51    131   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    52    131   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    53    131   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    54    131   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    55    195      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    56    195     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    57    195    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    58    195    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    59    195    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    60    195    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    61    195    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    62    195    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    63    195    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    64    195    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    65    195    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    66    195    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    67    195   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    68    195   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    69    195   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    70    195   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    71    195   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    72    195   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    73    259      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    74    259     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    75    259    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    76    259    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    77    259    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    78    259    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    79    259    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    80    259    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    81    259    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    82    259    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    83    259    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    84    259    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    85    259   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    86    259   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    87    259   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    88    259   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    89    259   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    90    259   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    91    323      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    92    323     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    93    323    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    94    323    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    95    323    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    96    323    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    97    323    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    98    323    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=    99    323    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   100    323    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   101    323    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   102    323    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   103    323   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   104    323   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   105    323   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   106    323   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   107    323   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   108    323   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   109    387      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   110    387     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   111    387    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   112    387    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   113    387    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   114    387    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   115    387    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   116    387    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   117    387    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   118    387    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   119    387    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   120    387    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   121    387   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   122    387   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   123    387   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   124    387   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   125    387   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   126    387   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   127    451      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   128    451     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   129    451    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   130    451    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   131    451    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   132    451    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   133    451    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   134    451    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   135    451    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   136    451    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   137    451    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   138    451    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   139    451   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   140    451   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   141    451   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   142    451   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   143    451   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   144    451   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   145    515      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   146    515     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   147    515    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   148    515    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   149    515    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   150    515    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   151    515    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   152    515    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   153    515    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   154    515    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   155    515    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   156    515    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   157    515   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   158    515   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   159    515   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   160    515   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   161    515   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   162    515   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   163    579      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   164    579     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   165    579    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   166    579    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   167    579    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   168    579    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   169    579    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   170    579    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   171    579    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   172    579    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   173    579    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   174    579    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   175    579   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   176    579   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   177    579   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   178    579   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   179    579   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   180    579   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   181    643      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   182    643     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   183    643    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   184    643    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   185    643    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   186    643    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   187    643    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   188    643    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   189    643    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   190    643    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   191    643    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   192    643    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   193    643   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   194    643   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   195    643   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   196    643   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   197    643   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   198    643   1452     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   199    707      1     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   200    707     87     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   201    707    173     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   202    707    259     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   203    707    345     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   204    707    431     64     86   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   205    707    517     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   206    707    602     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   207    707    687     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   208    707    772     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   209    707    857     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   210    707    942     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   211    707   1027     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   212    707   1112     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   213    707   1197     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   214    707   1282     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   215    707   1367     64     85   5590
+general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=   216    707   1452     64     85   5590
+ *** Finish reading file: fv3jedi/akbk.nc4
+m_gsibec*befname: reading B error-coeffs from berror/gsi-coeffs-gfs-global.nc4
+ gsi_metguess_mod*init_:  2D-MET STATE VARIABLES: 
+ ps
+ z
+ gsi_metguess_mod*init_:  3D-MET STATE VARIABLES:
+ u
+ v
+ tv
+ tsen
+ q
+ oz
+ ql
+ qi
+ gsi_metguess_mod*init_: ALL MET STATE VARIABLES:
+ u
+ v
+ tv
+ tsen
+ q
+ oz
+ ql
+ qi
+ ps
+ z
+ state_vectors*init_anasv:  2D-STATE VARIABLES ps                              
+ state_vectors*init_anasv:  3D-STATE VARIABLES u                               
+ v                               tv                              
+ tsen                            q                               
+ oz                              ql                              
+ qi                              prse                            
+ state_vectors*init_anasv: ALL STATE VARIABLES u                               
+ v                               tv                              
+ tsen                            q                               
+ oz                              ql                              
+ qi                              prse                            
+ ps                              
+ control_vectors*init_anacv: 2D-CONTROL VARIABLES ARE 
+ ps                              
+ control_vectors*init_anacv: 3D-CONTROL VARIABLES ARE 
+ sf                              vp                              
+ t                               q                               
+ oz                              cw                              
+ control_vectors*init_anacv: MOTLEY CONTROL VARIABLES 
+ control_vectors*init_anacv: ALL CONTROL VARIABLES    
+ sf                              vp                              
+ ps                              t                               
+ q                               oz                              
+ cw                              
+ INIT_IO:  reserve units lendian_in=          15  and lendian_out=          66 
+  for little endian i/o
+ INIT_IO:  set IO server task to mype_io=         215
+[009]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[074]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[184]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[110]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[079]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[190]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[012]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[104]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[193]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[116]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[019]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[096]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[198]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[119]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[039]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[021]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[084]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[201]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[133]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[031]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[072]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[202]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[143]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[203]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[204]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[139]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[208]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[181]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[207]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[042]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[047]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[057]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[058]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[063]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[005]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[097]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[109]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[099]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[205]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[050]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[114]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[128]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[036]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[011]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[002]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[073]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[024]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[093]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[013]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[087]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[043]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[075]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[064]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[138]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[182]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[145]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[134]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[001]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[016]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[030]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[215]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[187]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[192]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[200]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[102]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[111]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[196]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[186]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[185]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[106]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[140]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[037]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[188]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[127]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[049]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[034]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[180]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[068]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[080]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[115]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[206]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[062]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[006]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[083]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[121]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[038]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[008]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[210]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[000]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[129]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[090]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[054]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[189]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+  jcap_cut increased to jcap+1 =          767
+  jcap_cut < jcap+1 not allowed 
+[142]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[082]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[071]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[199]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[085]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[135]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[211]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[122]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[060]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[003]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[191]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[040]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[088]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[123]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[015]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[209]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[027]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[017]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[066]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[137]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[076]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[018]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[214]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[092]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[141]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[010]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[065]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[213]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[081]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[108]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[052]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[004]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[195]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[069]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[032]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[077]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[120]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[197]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[048]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[020]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[126]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[183]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[176]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[094]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[061]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[130]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[026]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[098]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[194]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[055]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[028]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[113]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[105]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[212]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[051]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[022]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[086]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[125]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[045]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[014]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[103]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[132]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[044]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[007]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[100]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[136]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[041]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[025]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[089]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[118]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[046]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[023]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[107]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[117]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[131]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[070]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[029]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[091]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[112]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[056]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[033]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[078]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[124]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[053]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[035]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[095]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[067]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[101]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[059]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[172]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[153]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[174]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[147]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[158]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[149]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[165]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[175]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[160]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[164]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[178]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[173]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[161]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+ GSI_4DVAR:  nobs_bins =            1
+[155]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+ SETUP_4DVAR: nobs_bins =    1, ntlevs_ens =    1
+ SETUP_4DVAR: allocate array containing time levels for ensemble
+ SETUP_4DVAR: timelevel =     1 , ens_fmnlevs =   360
+ SETUP_4DVAR: l4dvar= F
+ SETUP_4DVAR: l4densvar= F
+ SETUP_4DVAR: winlen=   6.00000000000000     
+ SETUP_4DVAR: winoff=   3.00000000000000     
+ SETUP_4DVAR: mn_obsbin=   360.000000000000     
+ SETUP_4DVAR: nobs_bins=           1
+ SETUP_4DVAR: ntlevs_ens=           1
+ SETUP_4DVAR: nsubwin,nhr_subwin=           1           6
+ SETUP_4DVAR: lsqrtb= F
+ SETUP_4DVAR: lbicg= F
+ SETUP_4DVAR: lcongrad= F
+ SETUP_4DVAR: lbfgsmin= F
+ SETUP_4DVAR: ltlint= F
+ SETUP_4DVAR: ladtest,ladtest_obs,lgrtest= F F F
+ SETUP_4DVAR: iwrtinc=          -1
+ SETUP_4DVAR: lanczosave= F
+ SETUP_4DVAR: ltcost= F
+ SETUP_4DVAR: jsiga=          -1
+ SETUP_4DVAR: nwrvecs=          -1
+ SETUP_4DVAR: iorthomax=           0
+ SETUP_4DVAR: liauon= F
+ SETUP_4DVAR: ljc4tlevs= F
+ SETUP_4DVAR: ibin_anl=           1
+ SETUP_4DVAR: tau_fcst=          -1
+ calling gsisub with following input parameters:
+
+
+ &SETUP
+ PSEUDO_Q2       = F,
+ CWOPTION        =           0,
+ QOPTION =           2,
+ VERBOSE = F,
+ MOCKBKG = F
+ /
+ &GRIDOPTS
+ JCAP    =         766,
+ JCAP_B  =         766,
+ NLAT    =         770,
+ NLON    =        1536,
+ NSIG    =         127,
+ USE_SP_EQSPACE  = F
+ /
+ &BKGERR
+ VS      =  0.700000000000000     ,
+ NHSCRF  =           3,
+ HZSCL   = 3*1.00000000000000        ,
+ HSWGT   =   1.00000000000000     , 2*0.000000000000000E+000  ,
+ NORH    =           2,
+ NDEG    =           4,
+ NOQ     =           3,
+ BW      =  0.000000000000000E+000,
+ NORSP   =           4,
+ FSTAT   = F,
+[148]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+ PERT_BERR       = F,
+ PERT_BERR_FCT   =  0.000000000000000E+000,
+ BKGV_FLOWDEP    = F,
+ BKGV_REWGTFCT   =   1.50000000000000     ,
+ BKGV_WRITE      = F,
+ FPSPROJ = T,
+ ADJUSTOZVAR     = F,
+ FUT2PS  = F,
+ CWCOVEQQCOV     = T,
+ ADJUSTOZHSCL    =   3.00000000000000     ,
+ SIMCV   = F,
+ BKGV_WRITE_CV   = null                                                                                                              
+                                                                                                                                     
+          ,
+ BKGV_WRITE_SV   = null                                                                                                              
+                                                                                                                                     
+          
+ /
+[152]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[150]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[170]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[167]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[177]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[159]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[157]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[151]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[156]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[166]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[179]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[168]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[154]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[144]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[169]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[171]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[162]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[146]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[163]gsimod*gsimain_initialize(): >>> WARNING <<< using defaults(hybrid_ensemble)
+[000]tendsmod*create_ges_tendencies(): >>> WARNING <<< no tendency fields requested
+ create_ges_tendencies: successfully complete
+ create_ges_derivatives: successfully complete
+ gridmod fv3_full_hydro  F
+ INIT_GRID_VARS:  allocate and load sp_a with jcap,imax,jmax=         766
+        1536         768
+ gsimod*gsimain_initialize: Complete
+ Gaussian Grid in Use
+ control_vectors: length=     4498648
+ control_vectors: currently allocated=           0
+ control_vectors: maximum allocated=           0
+ control_vectors: number of allocates=           0
+ control_vectors: number of deallocates=           0
+control_vectors: Estimated max memory used=      0.0 Mb
+ gsi_metguess_mod*create_: alloc() for met-guess done
+ User expected to provide guess-fields (viz. gsiguess_set)
+ vars still needing to be filled filled-ps                     
+ filled-z                      filled-u                      
+ filled-v                      tv                            
+ filled-tsen                   filled-q                      
+ filled-oz                     filled-ql                     
+ filled-qi                     
+ tpause: Warning, user request pv-based method to identify tropaupose,
+ but not all fields needed are available, resetting
+ method to temperature-based one
+ (tv,oz,vor) = (           0           0           1 )
+ m_berror_stats::get_dims: Try reading berror from NetCDF file
+ m_berror_stats::get_dims: Reading berror from NetCDF file
+ *** Finish reading file: berror/gsi-coeffs-gfs-global.nc4
+ *** Finish reading file: berror/gsi-coeffs-gfs-global.nc4
+CostJb: FG-BG
+----------------------------------------------------------------------------------------------------
+Increment print | number of fields = 8 | cube sphere face size: C384
+eastward_wind                                | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+northward_wind                               | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+air_temperature                              | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+surface_pressure                             | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+specific_humidity                            | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_ice                             | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_water                           | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+ozone_mass_mixing_ratio                      | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+----------------------------------------------------------------------------------------------------
+CostJb: FG-BG
+----------------------------------------------------------------------------------------------------
+Increment print | number of fields = 8 | cube sphere face size: C384
+eastward_wind                                | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+northward_wind                               | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+air_temperature                              | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+surface_pressure                             | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+specific_humidity                            | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_ice                             | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_water                           | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+ozone_mass_mixing_ratio                      | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+----------------------------------------------------------------------------------------------------
+CostJb   : Nonlinear Jb State = 0
+CostJb   : Nonlinear Jb Model Aux = 0
+CostJb   : Nonlinear Jb Obs Aux = 0
+CostJb   : Nonlinear Jb = 0
+CostFunction: Nonlinear J = 30.2445
+OOPS_STATS IncrementalAssimilation linearize 0      - Runtime:   321.66 sec,  Local Memory:     4.99 Gb
+
+DRIPCGMinimizer: max iter = 40, requested norm reduction = 1e-10
+CostFunction::computeGradientFG: gradient:
+----------------------------------------------------------------------------------------------------
+Increment print | number of fields = 8 | cube sphere face size: C384
+eastward_wind                                | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+northward_wind                               | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+air_temperature                              | Min:-2.267841e+00 Max:+0.000000e+00 RMS:+3.246347e-04
+surface_pressure                             | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+specific_humidity                            | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_ice                             | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_water                           | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+ozone_mass_mixing_ratio                      | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+----------------------------------------------------------------------------------------------------
+DRIPCGMinimizer rhs
+----------------------------------------------------------------------------------------------------
+Increment print | number of fields = 8 | cube sphere face size: C384
+eastward_wind                                | Min:-0.000000e+00 Max:-0.000000e+00 RMS:+0.000000e+00
+northward_wind                               | Min:-0.000000e+00 Max:-0.000000e+00 RMS:+0.000000e+00
+air_temperature                              | Min:-0.000000e+00 Max:+2.267841e+00 RMS:+3.246347e-04
+surface_pressure                             | Min:-0.000000e+00 Max:-0.000000e+00 RMS:+0.000000e+00
+specific_humidity                            | Min:-0.000000e+00 Max:-0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_ice                             | Min:-0.000000e+00 Max:-0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_water                           | Min:-0.000000e+00 Max:-0.000000e+00 RMS:+0.000000e+00
+ozone_mass_mixing_ratio                      | Min:-0.000000e+00 Max:-0.000000e+00 RMS:+0.000000e+00
+----------------------------------------------------------------------------------------------------
+Initial RHS squared norm = 11.8415
+OOPS_STATS DRIPCG start                             - Runtime:   322.16 sec,  Local Memory:     4.99 Gb
+
+ DRIPCG Starting Iteration 1
+OOPS_STATS DRIPCG iteration 1                       - Runtime:   361.72 sec,  Local Memory:     5.05 Gb
+DRIPCGMinimizer rho = 218.642, alpha = 0.405539
+DRIPCG end of iteration 1
+  Gradient reduction ( 1) = 5.768888059150692e-16
+  Norm reduction ( 1) = 1.676441659857552e-16
+
+  Quadratic cost function: J   ( 1) = 12.26535300859836
+  Quadratic cost function: Jb  ( 1) = 7.291268443820223
+  Quadratic cost function: JoJc( 1) = 4.974084564778141
+
+DRIPCG: Achieved required reduction in residual norm.
+OOPS_STATS DRIPCG end                               - Runtime:   402.55 sec,  Local Memory:     5.11 Gb
+DRIPCGMinimizer: reduction in residual norm = 1.67644e-16
+DRIPCGMinimizer output increment:
+----------------------------------------------------------------------------------------------------
+Increment print | number of fields = 8 | cube sphere face size: C384
+eastward_wind                                | Min:-5.176007e-02 Max:+5.277247e-02 RMS:+6.558585e-04
+northward_wind                               | Min:-5.812797e-02 Max:+4.716542e-02 RMS:+6.705880e-04
+air_temperature                              | Min:-7.435979e-03 Max:+8.831367e+00 RMS:+1.242303e-02
+surface_pressure                             | Min:-2.312176e-02 Max:+7.855302e-03 RMS:+6.368726e-04
+specific_humidity                            | Min:-6.117234e-02 Max:+1.061828e-06 RMS:+5.294676e-05
+cloud_liquid_ice                             | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_water                           | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+ozone_mass_mixing_ratio                      | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+----------------------------------------------------------------------------------------------------
+Write Increment - starting: 0
+
+NOTE from PE     0: MPP_IO_SET_STACK_SIZE: stack size set to   18726912.
+
+Write Increment: done.
+CostFunction::addIncrement: First guess:
+----------------------------------------------------------------------------------------------------
+State print | number of fields = 22 | cube sphere face size: C768
+eastward_wind                                | Min:-1.018171e+02 Max:+2.030707e+02 RMS:+2.482473e+01
+northward_wind                               | Min:-8.683116e+01 Max:+7.355132e+01 RMS:+9.689241e+00
+air_temperature                              | Min:+1.560355e+02 Max:+3.156412e+02 RMS:+2.511083e+02
+air_pressure_thickness                       | Min:+6.060000e-01 Max:+1.799212e+03 RMS:+9.569914e+02
+surface_pressure                             | Min:+4.763785e+04 Max:+1.050282e+05 RMS:+9.891041e+04
+specific_humidity                            | Min:+1.000000e-09 Max:+2.569944e-02 RMS:+5.109594e-03
+cloud_liquid_ice                             | Min:-1.618770e-20 Max:+1.676615e-03 RMS:+1.639502e-05
+cloud_liquid_water                           | Min:-1.474788e-19 Max:+2.222821e-03 RMS:+3.868811e-05
+ozone_mass_mixing_ratio                      | Min:+5.715667e-11 Max:+1.912976e-05 RMS:+4.405567e-06
+sfc_geopotential_height_times_grav           | Min:-4.008634e+03 Max:+6.097395e+04 RMS:+6.408709e+03
+slmsk                                        | Min:+0.000000e+00 Max:+2.000000e+00 RMS:+6.721748e-01
+sheleg                                       | Min:+0.000000e+00 Max:+5.810793e+02 RMS:+2.421112e+01
+sea_surface_temperature                      | Min:+1.968515e+02 Max:+3.315958e+02 RMS:+2.905633e+02
+vtype                                        | Min:+0.000000e+00 Max:+2.000000e+01 RMS:+5.812317e+00
+stype                                        | Min:+0.000000e+00 Max:+1.600000e+01 RMS:+4.280042e+00
+vfrac                                        | Min:+0.000000e+00 Max:+9.900000e-01 RMS:+2.670350e-01
+stc                                          | Min:+2.157410e+02 Max:+3.267783e+02 RMS:+2.907962e+02
+soilMoistureVolumetric                       | Min:+2.000000e-02 Max:+1.000000e+00 RMS:+8.633333e-01
+totalSnowDepth                               | Min:+0.000000e+00 Max:+5.370598e+03 RMS:+1.813320e+02
+surface_eastward_wind                        | Min:-2.720309e+01 Max:+3.111470e+01 RMS:+5.555139e+00
+surface_northward_wind                       | Min:-2.844245e+01 Max:+2.696388e+01 RMS:+4.817126e+00
+f10m                                         | Min:+9.256816e-01 Max:+1.101029e+00 RMS:+9.929073e-01
+----------------------------------------------------------------------------------------------------
+
+
+
+CostFunction::addIncrement: Increment:
+----------------------------------------------------------------------------------------------------
+Increment print | number of fields = 8 | cube sphere face size: C384
+eastward_wind                                | Min:-5.176007e-02 Max:+5.277247e-02 RMS:+6.558585e-04
+northward_wind                               | Min:-5.812797e-02 Max:+4.716542e-02 RMS:+6.705880e-04
+air_temperature                              | Min:-7.435979e-03 Max:+8.831367e+00 RMS:+1.242303e-02
+surface_pressure                             | Min:-2.312176e-02 Max:+7.855302e-03 RMS:+6.368726e-04
+specific_humidity                            | Min:-6.117234e-02 Max:+1.061828e-06 RMS:+5.294676e-05
+cloud_liquid_ice                             | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+cloud_liquid_water                           | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+ozone_mass_mixing_ratio                      | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+----------------------------------------------------------------------------------------------------
+ fv3jedi_state_mod.add_incr: Removed negative values for cloud_liquid_ice
+ fv3jedi_state_mod.add_incr: Removed negative values for cloud_liquid_water
+CostFunction::addIncrement: Analysis: 
+----------------------------------------------------------------------------------------------------
+State print | number of fields = 22 | cube sphere face size: C768
+eastward_wind                                | Min:-1.018171e+02 Max:+2.030707e+02 RMS:+2.482471e+01
+northward_wind                               | Min:-8.683116e+01 Max:+7.355132e+01 RMS:+9.689227e+00
+air_temperature                              | Min:+1.560355e+02 Max:+3.156412e+02 RMS:+2.511084e+02
+air_pressure_thickness                       | Min:+6.060000e-01 Max:+1.799212e+03 RMS:+9.569914e+02
+surface_pressure                             | Min:+4.763785e+04 Max:+1.050282e+05 RMS:+9.891041e+04
+specific_humidity                            | Min:+0.000000e+00 Max:+2.569944e-02 RMS:+5.109595e-03
+cloud_liquid_ice                             | Min:+0.000000e+00 Max:+1.676615e-03 RMS:+1.639502e-05
+cloud_liquid_water                           | Min:+0.000000e+00 Max:+2.222821e-03 RMS:+3.868811e-05
+ozone_mass_mixing_ratio                      | Min:+5.715667e-11 Max:+1.912976e-05 RMS:+4.405567e-06
+sfc_geopotential_height_times_grav           | Min:-4.008634e+03 Max:+6.097395e+04 RMS:+6.408709e+03
+slmsk                                        | Min:+0.000000e+00 Max:+2.000000e+00 RMS:+6.721748e-01
+sheleg                                       | Min:+0.000000e+00 Max:+5.810793e+02 RMS:+2.421112e+01
+sea_surface_temperature                      | Min:+1.968515e+02 Max:+3.315958e+02 RMS:+2.905633e+02
+vtype                                        | Min:+0.000000e+00 Max:+2.000000e+01 RMS:+5.812317e+00
+stype                                        | Min:+0.000000e+00 Max:+1.600000e+01 RMS:+4.280042e+00
+vfrac                                        | Min:+0.000000e+00 Max:+9.900000e-01 RMS:+2.670350e-01
+stc                                          | Min:+2.157410e+02 Max:+3.267783e+02 RMS:+2.907962e+02
+soilMoistureVolumetric                       | Min:+2.000000e-02 Max:+1.000000e+00 RMS:+8.633333e-01
+totalSnowDepth                               | Min:+0.000000e+00 Max:+5.370598e+03 RMS:+1.813320e+02
+surface_eastward_wind                        | Min:-2.720309e+01 Max:+3.111470e+01 RMS:+5.555139e+00
+surface_northward_wind                       | Min:-2.844245e+01 Max:+2.696388e+01 RMS:+4.817126e+00
+f10m                                         | Min:+9.256816e-01 Max:+1.101029e+00 RMS:+9.929073e-01
+----------------------------------------------------------------------------------------------------
+
+
+
+OOPS_STATS IncrementalAssimilation end              - Runtime:   415.07 sec,  Local Memory:     5.11 Gb
+Variational: incremental assimilation done 1 iterations.
+Writing file: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T4.32/latlon.inc.hyb-3dvar.20210801T000000Z.nc
+Writing file: /work/noaa/da/kswan/jeditestrun/analysis/20210801T00000000Z/T4.32/latlon.an.hyb-3dvar.20210801T000000Z.nc
+ObsErrorDiag covariance updated 1
+Observer::finalize QC = 
+SingleOb airTemperature nlocs = 1, nobs = 1, min = 0, max = 0, avg = 0
+Jo Observations:
+SingleOb nobs= 1 Min=261, Max=261, RMS=261
+
+End Jo Observations
+Jo Observations Equivalent:
+SingleOb nobs= 1 Min=257.822, Max=257.822, RMS=257.822
+
+End Jo Observations Equivalent
+Jo Bias Corrected Departures:
+SingleOb nobs= 1 Min=-3.1784, Max=-3.1784, RMS=3.1784
+
+End Jo Bias Corrected Departures
+Jo Observations Errors:
+Diagonal observation error covariance
+SingleOb nobs= 1 Min=1, Max=1, RMS=1
+
+End Jo Observations Errors
+CostJo   : Nonlinear Jo(SingleOb) = 5.05111, nobs = 1, Jo/n = 5.05111, err = 1
+CostJo   : Nonlinear Jo = 5.05111
+CostJb: FG-BG
+----------------------------------------------------------------------------------------------------
+Increment print | number of fields = 8 | cube sphere face size: C384
+eastward_wind                                | Min:-5.169724e-02 Max:+5.269946e-02 RMS:+6.551893e-04
+northward_wind                               | Min:-5.805028e-02 Max:+4.710024e-02 RMS:+6.698852e-04
+air_temperature                              | Min:-7.435138e-03 Max:+8.479183e+00 RMS:+1.223477e-02
+surface_pressure                             | Min:-2.308838e-02 Max:+7.831347e-03 RMS:+6.361708e-04
+specific_humidity                            | Min:-3.891278e-06 Max:+1.004784e-06 RMS:+4.620226e-08
+cloud_liquid_ice                             | Min:+0.000000e+00 Max:+1.355253e-20 RMS:+8.911311e-24
+cloud_liquid_water                           | Min:+0.000000e+00 Max:+3.720030e-20 RMS:+1.315073e-22
+ozone_mass_mixing_ratio                      | Min:+0.000000e+00 Max:+0.000000e+00 RMS:+0.000000e+00
+----------------------------------------------------------------------------------------------------
+
+ GMRESR Starting Iteration 1
+GMRESR end of iteration 1
+  Gradient reduction ( 1) = 104.4144851362769
+  Norm reduction ( 1) = 0.8027525761339622
+
+ GMRESR Starting Iteration 2
+GMRESR end of iteration 2
+  Gradient reduction ( 2) = 95.97861010886351
+  Norm reduction ( 2) = 0.73789643666862
+
+ GMRESR Starting Iteration 3
+GMRESR end of iteration 3
+  Gradient reduction ( 3) = 90.41409584937765
+  Norm reduction ( 3) = 0.6951157041782341
+
+ GMRESR Starting Iteration 4
+GMRESR end of iteration 4
+  Gradient reduction ( 4) = 86.47369929526567
+  Norm reduction ( 4) = 0.6648214065941933
+
+ GMRESR Starting Iteration 5
+GMRESR end of iteration 5
+  Gradient reduction ( 5) = 81.50932329142273
+  Norm reduction ( 5) = 0.626654617563138
+
+ GMRESR Starting Iteration 6
+GMRESR end of iteration 6
+  Gradient reduction ( 6) = 80.72412674160422
+  Norm reduction ( 6) = 0.6206179210998489
+
+ GMRESR Starting Iteration 7
+GMRESR end of iteration 7
+  Gradient reduction ( 7) = 79.87572677596974
+  Norm reduction ( 7) = 0.6140953082926683
+
+ GMRESR Starting Iteration 8
+GMRESR end of iteration 8
+  Gradient reduction ( 8) = 78.9206094609016
+  Norm reduction ( 8) = 0.6067522381795475
+
+ GMRESR Starting Iteration 9
+GMRESR end of iteration 9
+  Gradient reduction ( 9) = 78.41007329493932
+  Norm reduction ( 9) = 0.6028271676119832
+
+ GMRESR Starting Iteration 10
+GMRESR end of iteration 10
+  Gradient reduction (10) = 77.74646019923787
+  Norm reduction (10) = 0.5977252210627541
+
+CostJb   : Nonlinear Jb State = 3.36554
+CostJb   : Nonlinear Jb Model Aux = 0
+CostJb   : Nonlinear Jb Obs Aux = 0
+CostJb   : Nonlinear Jb = 3.36554
+CostFunction: Nonlinear J = 8.41665
+OOPS_STATS Variational end                          - Runtime:   981.13 sec,  Local Memory:     5.76 Gb
+SingleOb: save database to ./diags/singleob_v3.nc (io pool size: 10)
+
+Run: Finishing oops::Variational<FV3JEDI, UFO and IODA observations>
+OOPS_STATS  
+OOPS_STATS ----------------------------------------------------------------------------------
+OOPS_STATS --------------------------- Object counts ----------------------------------------
+OOPS_STATS ----------------------------------------------------------------------------------
+OOPS_STATS                                      Total  Simult. Remain    Avg (Mb)    HWM (Mb)
+OOPS_STATS fv3jedi::Geometry               :        2       2        
+OOPS_STATS fv3jedi::IOFms                  :        2       1        
+OOPS_STATS fv3jedi::Increment              :      159      32        
+OOPS_STATS fv3jedi::ModelBias              :        5       3        
+OOPS_STATS fv3jedi::ModelBiasCovariance    :        1       1        
+OOPS_STATS fv3jedi::State                  :       24       6        
+OOPS_STATS fv3jedi::VarChaModel2GeoVaLs    :        3       1        
+OOPS_STATS ioda::ObsDataVector             :        4       4        
+OOPS_STATS ioda::ObsVector                 :       20       7        
+OOPS_STATS oops::ControlIncrement          :       23      16               29.16      466.62
+OOPS_STATS oops::ControlVariable           :        5       3        
+OOPS_STATS oops::GeoVaLs                   :        6       1        
+OOPS_STATS oops::Geometry                  :        2       2        
+OOPS_STATS oops::GetValues                 :        3       2        
+OOPS_STATS oops::Increment                 :      112      32               29.67      933.23
+OOPS_STATS oops::LinearObsOperator         :        1       1        
+OOPS_STATS oops::ModelAuxControl           :        5       3        
+OOPS_STATS oops::ModelAuxCovariance        :        1       1        
+OOPS_STATS oops::ModelAuxIncrement         :       23      16        
+OOPS_STATS oops::ObsAuxControl             :        5       3        
+OOPS_STATS oops::ObsAuxCovariance          :        1       1        
+OOPS_STATS oops::ObsAuxIncrement           :       23      16        
+OOPS_STATS oops::ObsAuxIncrements          :       23      16        
+OOPS_STATS oops::ObsAuxPreconditioner      :        2       2        
+OOPS_STATS oops::ObsDataVector             :        4       4        
+OOPS_STATS oops::ObsDiagnostics            :        2       1        
+OOPS_STATS oops::ObsError                  :        1       1        
+OOPS_STATS oops::ObsOperator               :        2       2        
+OOPS_STATS oops::ObsSpace                  :        1       1        
+OOPS_STATS oops::ObsSpaces                 :        1       1        
+OOPS_STATS oops::ObsVector                 :       20       7                0.00        0.00
+OOPS_STATS oops::SampledLocations          :        8       4        
+OOPS_STATS oops::State                     :       11       5               98.76      543.16
+OOPS_STATS oops::UnstructuredInterpolation :        2       2        
+OOPS_STATS oops::UnstructuredInterpolator  :     1080     648        
+OOPS_STATS oops::VariableChange            :        3       1        
+OOPS_STATS saber::ErrorCovariance          :        1       1        
+OOPS_STATS ufo::GeoVaLs                    :        9       2        
+OOPS_STATS ufo::ObsAtmVertInterp           :        2       2        
+OOPS_STATS ufo::ObsAtmVertInterpTLAD       :        1       1        
+OOPS_STATS ufo::ObsBias                    :        5       3        
+OOPS_STATS ufo::ObsBiasCovariance          :        1       1        
+OOPS_STATS ufo::ObsBiasPreconditioner      :        1       1        
+OOPS_STATS ufo::SampledLocations           :        4       3        
+OOPS_STATS ----------------------------- Object counts --------------------------------------
+OOPS_STATS  
+OOPS_STATS --------------------------------------------------------------------------------------------
+OOPS_STATS ------------------------------------ Timing Statistics -------------------------------------
+OOPS_STATS --------------------------------------------------------------------------------------------
+OOPS_STATS Name                                                :   total (ms)   count    time/call (ms)
+OOPS_STATS Vader::Vader                                        :        15.23       5            3.0464
+OOPS_STATS Vader::changeVar                                    :      1324.17       5          264.8340
+OOPS_STATS fv3jedi::IOFms::IOFms                               :         3.67       2            1.8359
+OOPS_STATS fv3jedi::IOFms::read state                          :      3639.68       1         3639.6763
+OOPS_STATS fv3jedi::IOFms::write increment                     :      3450.60       1         3450.6042
+OOPS_STATS fv3jedi::IOFms::~IOFms                              :         0.01       2            0.0051
+OOPS_STATS fv3jedi::LinVarChaC2A::LinVarChaC2A                 :        68.09       1           68.0858
+OOPS_STATS fv3jedi::LinVarChaC2A::multiply                     :       314.74      14           22.4815
+OOPS_STATS fv3jedi::LinVarChaC2A::multiplyAD                   :      3259.81      14          232.8437
+OOPS_STATS fv3jedi::LinVarChaC2A::~LinVarChaC2A                :         0.43       1            0.4297
+OOPS_STATS fv3jedi::LinVarChaModel2GeoVaLs::LinVarChaModel2GeoVaLs:         6.50       1            6.5032
+OOPS_STATS fv3jedi::LinVarChaModel2GeoVaLs::multiplyAD         :         4.75       2            2.3771
+OOPS_STATS fv3jedi::LinVarChaModel2GeoVaLs::~LinVarChaModel2GeoVaLs:         0.04       1            0.0424
+OOPS_STATS fv3jedi::VarChaModel2GeoVaLs::VarChaModel2GeoVaLs   :         0.14       3            0.0462
+OOPS_STATS fv3jedi::VarChaModel2GeoVaLs::changeVar             :        24.44       3            8.1452
+OOPS_STATS fv3jedi::VarChaModel2GeoVaLs::~VarChaModel2GeoVaLs  :         0.01       3            0.0035
+OOPS_STATS oops::Covariance::SABER::Constructor                :      1107.23       1         1107.2299
+OOPS_STATS oops::Covariance::SABER::inverseMultiply            :    521028.32       2       260514.1580
+OOPS_STATS oops::Covariance::SABER::multiply                   :    593712.23      14        42408.0166
+OOPS_STATS oops::GeoVaLs::GeoVaLs                              :        11.63       6            1.9385
+OOPS_STATS oops::GeoVaLs::fill                                 :         0.71    1512            0.0005
+OOPS_STATS oops::GeoVaLs::fillAD                               :         0.24     432            0.0006
+OOPS_STATS oops::GeoVaLs::~GeoVaLs                             :         0.04       6            0.0059
+OOPS_STATS oops::Geometry::Geometry                            :      6055.56       2         3027.7789
+OOPS_STATS oops::Geometry::latlon                              :         0.66       4            0.1659
+OOPS_STATS oops::Geometry::variableSizes                       :         0.20      12            0.0163
+OOPS_STATS oops::Geometry::~Geometry                           :       169.24       2           84.6183
+OOPS_STATS oops::GeometryData::setGlobalTree                   :      2487.08       2         1243.5380
+OOPS_STATS oops::GeometryData::setLocalTree                    :        10.47       2            5.2374
+OOPS_STATS oops::GetValues::GetValues                          :       859.77       3          286.5910
+OOPS_STATS oops::GetValues::fillGeoVaLs                        :       280.80       3           93.5995
+OOPS_STATS oops::GetValues::fillGeoVaLsAD                      :         1.90       2            0.9485
+OOPS_STATS oops::GetValues::fillGeoVaLsTL                      :        13.77       1           13.7689
+OOPS_STATS oops::GetValues::finalize                           :       215.02       3           71.6720
+OOPS_STATS oops::GetValues::finalizeAD                         :       206.60       2          103.3014
+OOPS_STATS oops::GetValues::finalizeTL                         :         0.60       1            0.6020
+OOPS_STATS oops::GetValues::process                            :       254.78       3           84.9278
+OOPS_STATS oops::GetValues::processAD                          :        47.41       2           23.7026
+OOPS_STATS oops::GetValues::processTL                          :        11.14       1           11.1374
+OOPS_STATS oops::Increment::Increment                          :      4442.09     112           39.6615
+OOPS_STATS oops::Increment::axpy                               :      1825.89     113           16.1583
+OOPS_STATS oops::Increment::diff                               :    205530.92       4        51382.7298
+OOPS_STATS oops::Increment::dot_product_with                   :      2363.74      88           26.8607
+OOPS_STATS oops::Increment::fromFieldSet                       :       447.35      14           31.9539
+OOPS_STATS oops::Increment::operator*=                         :       225.32      21           10.7296
+OOPS_STATS oops::Increment::operator+=                         :        75.48       5           15.0965
+OOPS_STATS oops::Increment::operator+=(State, Increment)       :      7961.54       1         7961.5443
+OOPS_STATS oops::Increment::operator-=                         :        37.36       2           18.6806
+OOPS_STATS oops::Increment::operator=                          :       690.90      44           15.7022
+OOPS_STATS oops::Increment::serialSize                         :         0.01      23            0.0003
+OOPS_STATS oops::Increment::toFieldSet                         :      2822.83      19          148.5699
+OOPS_STATS oops::Increment::toFieldSetAD                       :        24.16       2           12.0782
+OOPS_STATS oops::Increment::write                              :      3450.76       1         3450.7607
+OOPS_STATS oops::Increment::zero                               :        46.17       6            7.6955
+OOPS_STATS oops::Increment::~Increment                         :         3.88     112            0.0346
+OOPS_STATS oops::LinearObsOper::SingleOb::LinearObsOperator    :         0.09       1            0.0932
+OOPS_STATS oops::LinearObsOper::SingleOb::requiredVars         :         0.00       5            0.0010
+OOPS_STATS oops::LinearObsOper::SingleOb::setTrajectory        :         0.31       1            0.3107
+OOPS_STATS oops::LinearObsOper::SingleOb::simulateObsAD        :         0.08       2            0.0378
+OOPS_STATS oops::LinearObsOper::SingleOb::simulateObsTL        :         0.02       1            0.0190
+OOPS_STATS oops::LinearObsOper::SingleOb::~LinearObsOperator   :         0.02       1            0.0214
+OOPS_STATS oops::LinearVariableChange::LinearVariableChange    :        15.09       2            7.5451
+OOPS_STATS oops::LinearVariableChange::changeVarAD             :      6677.55      16          417.3471
+OOPS_STATS oops::LinearVariableChange::changeVarTL             :      4159.43      15          277.2952
+OOPS_STATS oops::LinearVariableChange::changeVarTraj           :      1390.73       2          695.3636
+OOPS_STATS oops::LinearVariableChange::~LinearVariableChange   :       134.59       2           67.2948
+OOPS_STATS oops::ModelAuxControl::ModelAuxControl              :         0.02       5            0.0037
+OOPS_STATS oops::ModelAuxControl::print                        :         0.00       3            0.0013
+OOPS_STATS oops::ModelAuxControl::~ModelAuxControl             :        35.91       5            7.1825
+OOPS_STATS oops::ModelAuxCovariance::ModelAuxCovariance        :         0.00       1            0.0027
+OOPS_STATS oops::ModelAuxCovariance::inverseMultiply           :         0.00       2            0.0015
+OOPS_STATS oops::ModelAuxCovariance::linearize                 :         0.00       1            0.0005
+OOPS_STATS oops::ModelAuxCovariance::multiply                  :         0.00       2            0.0008
+OOPS_STATS oops::ModelAuxCovariance::~ModelAuxCovariance       :         0.00       1            0.0028
+OOPS_STATS oops::ModelAuxIncrement::ModelAuxIncrement          :         0.02      23            0.0009
+OOPS_STATS oops::ModelAuxIncrement::axpy                       :         0.00       3            0.0004
+OOPS_STATS oops::ModelAuxIncrement::diff                       :         0.00       3            0.0005
+OOPS_STATS oops::ModelAuxIncrement::dot_product_with           :         0.00      11            0.0003
+OOPS_STATS oops::ModelAuxIncrement::operator*=                 :         0.01       1            0.0100
+OOPS_STATS oops::ModelAuxIncrement::operator+=                 :         0.00       3            0.0006
+OOPS_STATS oops::ModelAuxIncrement::operator+=ModelAuxControl  :         0.00       1            0.0003
+OOPS_STATS oops::ModelAuxIncrement::operator=                  :         0.00       6            0.0005
+OOPS_STATS oops::ModelAuxIncrement::print                      :        10.12       7            1.4460
+OOPS_STATS oops::ModelAuxIncrement::serialSize                 :         0.00      23            0.0001
+OOPS_STATS oops::ModelAuxIncrement::write                      :         0.00       1            0.0002
+OOPS_STATS oops::ModelAuxIncrement::zero                       :         0.00       2            0.0005
+OOPS_STATS oops::ModelAuxIncrement::~ModelAuxIncrement         :        11.81      23            0.5133
+OOPS_STATS oops::ObsAuxControl::ObsAuxControl                  :         0.26       5            0.0524
+OOPS_STATS oops::ObsAuxControl::print                          :         0.00       3            0.0010
+OOPS_STATS oops::ObsAuxControl::requiredHdiagnostics           :         0.00       2            0.0007
+OOPS_STATS oops::ObsAuxControl::requiredVars                   :         0.00       3            0.0003
+OOPS_STATS oops::ObsAuxControl::write                          :       160.77       1          160.7743
+OOPS_STATS oops::ObsAuxControl::~ObsAuxControl                 :         0.21       5            0.0412
+OOPS_STATS oops::ObsAuxCovariance::ObsAuxCovariance            :         0.02       1            0.0175
+OOPS_STATS oops::ObsAuxCovariance::inverseMultiply             :        19.38       4            4.8455
+OOPS_STATS oops::ObsAuxCovariance::linearize                   :         0.02       1            0.0205
+OOPS_STATS oops::ObsAuxCovariance::multiply                    :         0.02       2            0.0116
+OOPS_STATS oops::ObsAuxCovariance::preconditioner              :         0.04       1            0.0353
+OOPS_STATS oops::ObsAuxCovariance::~ObsAuxCovariance           :         0.00       1            0.0035
+OOPS_STATS oops::ObsAuxIncrement::ObsAuxIncrement              :         0.73      23            0.0319
+OOPS_STATS oops::ObsAuxIncrement::axpy                         :         0.01       3            0.0035
+OOPS_STATS oops::ObsAuxIncrement::diff                         :         0.04       3            0.0121
+OOPS_STATS oops::ObsAuxIncrement::dot_product_with             :         0.02      11            0.0020
+OOPS_STATS oops::ObsAuxIncrement::operator*=                   :         0.01       1            0.0116
+OOPS_STATS oops::ObsAuxIncrement::operator+=                   :         0.01       3            0.0037
+OOPS_STATS oops::ObsAuxIncrement::operator=                    :         0.02       6            0.0039
+OOPS_STATS oops::ObsAuxIncrement::print                        :         0.01       7            0.0016
+OOPS_STATS oops::ObsAuxIncrement::serialSize                   :         0.00      46            0.0001
+OOPS_STATS oops::ObsAuxIncrement::write                        :         0.00       1            0.0002
+OOPS_STATS oops::ObsAuxIncrement::zero                         :         0.02       2            0.0087
+OOPS_STATS oops::ObsAuxIncrement::~ObsAuxIncrement             :         0.04      23            0.0019
+OOPS_STATS oops::ObsAuxPreconditioner::multiply                :         0.02       2            0.0077
+OOPS_STATS oops::ObsAuxPreconditioner::~ObsAuxPreconditioner   :         0.00       2            0.0005
+OOPS_STATS oops::ObsDataVector::ObsDataVector                  :         0.09       4            0.0217
+OOPS_STATS oops::ObsDataVector::mask                           :         0.00       2            0.0008
+OOPS_STATS oops::ObsDataVector::operator=                      :         0.02       6            0.0032
+OOPS_STATS oops::ObsDataVector::print                          :         8.08       2            4.0407
+OOPS_STATS oops::ObsDataVector::save                           :        10.67       4            2.6672
+OOPS_STATS oops::ObsDataVector::~ObsDataVector                 :         0.01       4            0.0020
+OOPS_STATS oops::ObsDiagnostics::ObsDiagnostics                :         0.04       2            0.0195
+OOPS_STATS oops::ObsDiagnostics::~ObsDiagnostics               :         0.03       2            0.0161
+OOPS_STATS oops::ObsError::ObsErrors                           :         1.09       1            1.0894
+OOPS_STATS oops::ObsError::getRMSE                             :         5.63       4            1.4084
+OOPS_STATS oops::ObsError::inverseMultiply                     :         0.01       3            0.0047
+OOPS_STATS oops::ObsError::obserrors                           :         0.02       2            0.0099
+OOPS_STATS oops::ObsError::print                               :         0.15       2            0.0764
+OOPS_STATS oops::ObsError::update                              :        53.70       2           26.8494
+OOPS_STATS oops::ObsError::~ObsError                           :         0.10       1            0.0974
+OOPS_STATS oops::ObsOperator::SingleOb::ObsOperator            :        38.37       2           19.1869
+OOPS_STATS oops::ObsOperator::SingleOb::locations              :         0.52       3            0.1718
+OOPS_STATS oops::ObsOperator::SingleOb::requiredVars           :         0.00       3            0.0008
+OOPS_STATS oops::ObsOperator::SingleOb::simulateObs            :        44.54       2           22.2711
+OOPS_STATS oops::ObsOperator::SingleOb::~ObsOperator           :        11.07       2            5.5333
+OOPS_STATS oops::ObsSpace::ObsSpace                            :       590.16       1          590.1604
+OOPS_STATS oops::ObsSpace::obsvariables                        :         0.00       2            0.0003
+OOPS_STATS oops::ObsSpace::save                                :     27104.95       1        27104.9467
+OOPS_STATS oops::ObsSpace::~ObsSpace                           :        46.27       1           46.2746
+OOPS_STATS oops::ObsVector::ObsVector                          :        17.38      20            0.8688
+OOPS_STATS oops::ObsVector::dot_product                        :         1.85       4            0.4614
+OOPS_STATS oops::ObsVector::invert                             :         0.00       3            0.0012
+OOPS_STATS oops::ObsVector::operator*=                         :         0.01       8            0.0007
+OOPS_STATS oops::ObsVector::operator-=                         :         0.00       2            0.0012
+OOPS_STATS oops::ObsVector::operator=                          :         0.01       9            0.0013
+OOPS_STATS oops::ObsVector::rms                                :         2.21       4            0.5521
+OOPS_STATS oops::ObsVector::save                               :         0.18       6            0.0300
+OOPS_STATS oops::ObsVector::zero                               :         0.56       3            0.1853
+OOPS_STATS oops::ObsVector::~ObsVector                         :        18.96      20            0.9482
+OOPS_STATS oops::Parameters::deserialize                       :        44.04      41            1.0741
+OOPS_STATS oops::Parameters::serialize                         :         3.20      75            0.0427
+OOPS_STATS oops::SampledLocations::SampledLocations            :         0.00       4            0.0006
+OOPS_STATS oops::SampledLocations::latitudes                   :         0.00       3            0.0001
+OOPS_STATS oops::SampledLocations::longitudes                  :         0.00       3            0.0001
+OOPS_STATS oops::SampledLocations::times                       :         0.00       3            0.0001
+OOPS_STATS oops::SampledLocations::~SampledLocations           :        10.41       8            1.3009
+OOPS_STATS oops::State::State                                  :    103677.96      11         9425.2688
+OOPS_STATS oops::State::toFieldSet                             :      2221.98       6          370.3305
+OOPS_STATS oops::State::variables                              :         0.00       1            0.0001
+OOPS_STATS oops::State::~State                                 :         2.40      11            0.2185
+OOPS_STATS oops::UnstructuredInterpolator::UnstructuredInterpolator:        52.37    1080            0.0485
+OOPS_STATS oops::UnstructuredInterpolator::apply               :        29.72    1296            0.0229
+OOPS_STATS oops::UnstructuredInterpolator::applyAD             :        12.93     432            0.0299
+OOPS_STATS oops::VariableChange::VariableChange                :         2.51       3            0.8373
+OOPS_STATS oops::VariableChange::changeVar                     :      3836.61       3         1278.8686
+OOPS_STATS oops::VariableChange::~VariableChange               :         6.36       3            2.1202
+OOPS_STATS saber::ErrorCovariance::doMultiply                  :    581936.70      14        41566.9068
+OOPS_STATS saber::ErrorCovariance::~ErrorCovariance            :         0.00       1            0.0002
+OOPS_STATS saber::gsi::Covariance::Covariance                  :         0.14       1            0.1378
+OOPS_STATS saber::gsi::Covariance::multiply                    :    129140.31      14         9224.3075
+OOPS_STATS saber::gsi::Covariance::~Covariance                 :         8.81       1            8.8053
+OOPS_STATS saber::gsi::Grid::Grid                              :       171.39       1          171.3913
+OOPS_STATS saber::gsi::Grid::~Grid                             :         0.02       1            0.0232
+OOPS_STATS saber::gsi::Interpolation::Interpolation            :      1570.97       1         1570.9744
+OOPS_STATS saber::gsi::Interpolation::multiply                 :    144692.19      14        10335.1561
+OOPS_STATS saber::gsi::Interpolation::multiplyAD               :    326689.69      15        21779.3125
+OOPS_STATS saber::gsi::Interpolation::~Interpolation           :         0.00       1            0.0004
+OOPS_STATS util::Timers::Total                                 :   1004086.56       1      1004086.5643
+OOPS_STATS util::Timers::measured                              :    993015.49       1       993015.4908
+OOPS_STATS ------------------------------------ Timing Statistics -------------------------------------
+
+OOPS_STATS ------------------------------------------------------------------------------------------------------------------
+OOPS_STATS ---------------------------------- Parallel Timing Statistics ( 216 MPI tasks) -----------------------------------
+OOPS_STATS ------------------------------------------------------------------------------------------------------------------
+OOPS_STATS Name                                                :     min (ms)    max (ms)    avg (ms)     % total   imbal (%)
+OOPS_STATS oops::Covariance::SABER::Constructor                :      1091.02     1109.76     1103.06        0.11        1.70
+OOPS_STATS oops::Covariance::SABER::inverseMultiply            :    520971.44   521077.63   521034.17       51.89        0.02
+OOPS_STATS oops::Covariance::SABER::multiply                   :    593699.25   594068.32   593808.50       59.14        0.06
+OOPS_STATS oops::Geometry::Geometry                            :      6010.66     6374.16     6298.64        0.63        5.77
+OOPS_STATS oops::GeometryData::setGlobalTree                   :      2381.78     2491.63     2458.89        0.24        4.47
+OOPS_STATS oops::Increment::Increment                          :      3978.18     4587.74     4446.47        0.44       13.71
+OOPS_STATS oops::Increment::axpy                               :      1761.55     1954.02     1827.99        0.18       10.53
+OOPS_STATS oops::Increment::diff                               :    205246.52   206876.16   205950.35       20.51        0.79
+OOPS_STATS oops::Increment::dot_product_with                   :      1881.66     2445.15     2274.13        0.23       24.78
+OOPS_STATS oops::Increment::operator+=(State, Increment)       :      7911.22     7974.76     7952.74        0.79        0.80
+OOPS_STATS oops::Increment::toFieldSet                         :      2450.35     2880.20     2652.40        0.26       16.21
+OOPS_STATS oops::Increment::write                              :      3186.13     3775.95     3399.06        0.34       17.35
+OOPS_STATS oops::LinearVariableChange::changeVarAD             :      6636.09     7140.20     6786.52        0.68        7.43
+OOPS_STATS oops::LinearVariableChange::changeVarTL             :      3887.58     4214.82     4065.51        0.40        8.05
+OOPS_STATS oops::LinearVariableChange::changeVarTraj           :      1324.79     1424.42     1388.55        0.14        7.18
+OOPS_STATS oops::ObsSpace::save                                :      3753.01    27173.31    21697.63        2.16      107.94
+OOPS_STATS oops::State::State                                  :    103653.14   103914.47   103779.77       10.34        0.25
+OOPS_STATS oops::State::toFieldSet                             :      2056.89     2883.07     2330.47        0.23       35.45
+OOPS_STATS oops::VariableChange::changeVar                     :      3077.12     3952.09     3375.57        0.34       25.92
+OOPS_STATS util::Timers::Total                                 :   1004076.01  1004112.88  1004089.36      100.00        0.00
+OOPS_STATS util::Timers::measured                              :    971210.62   993919.13   988528.01       98.45        2.30
+OOPS_STATS ---------------------------------- Parallel Timing Statistics ( 216 MPI tasks) -----------------------------------
+
+OOPS_STATS Run end                                  - Runtime:   1009.41 sec,  Memory: total:  1183.75 Gb, per task: min =     5.19 Gb, max =     5.76 Gb
+Run: Finishing oops::Variational<FV3JEDI, UFO and IODA observations> with status = 0
+OOPS Ending   2023-07-17 12:50:32 (UTC-0500)
